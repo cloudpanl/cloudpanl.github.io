@@ -3,19 +3,24 @@
 
 
     
-    
   <url>
-    <loc>http://yoursite.com/2018/03/18/hello-world.html</loc>
-    <lastmod>2018-03-18T02:24:52.153Z</lastmod>
+    <loc>http://yoursite.com/2018/03/18/choosing-a-linux-tracer.html</loc>
+    <lastmod>2018-03-18T15:19:43.668Z</lastmod>
     <data>
         <display>
-        <title>Hello World</title>
-        <pubTime>2018-03-18T02:24:52.153Z</pubTime>
+        <title>如何选择 Linux 上的跟踪器</title>
+        <pubTime>2018-03-18T14:38:01.000Z</pubTime>
         
+        <tag>Linux</tag>
+         
          
            
+             
+              <breadCrumb title="Linux" url="http://yoursite.com/categories/Linux/"/>
+          
         </display>
     </data>
     </url>
 
+    
 </urlset>
