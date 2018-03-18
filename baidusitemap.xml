@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+
+    
+    
+  <url>
+    <loc>http://yoursite.com/2018/03/18/test.html</loc>
+    <lastmod>2018-03-18T06:17:33.417Z</lastmod>
+    <data>
+        <display>
+        <title>test</title>
+        <pubTime>2018-03-18T06:06:46.000Z</pubTime>
+        
+        <tag>标签1</tag>
+         
+        <tag>标签2</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hexo教程" url="http://yoursite.com/categories/Hexo%E6%95%99%E7%A8%8B/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://yoursite.com/2018/03/18/hello-world.html</loc>
+    <lastmod>2018-03-18T02:24:52.153Z</lastmod>
+    <data>
+        <display>
+        <title>Hello World</title>
+        <pubTime>2018-03-18T02:24:52.153Z</pubTime>
+        
+         
+           
+        </display>
+    </data>
+    </url>
+
+</urlset>
