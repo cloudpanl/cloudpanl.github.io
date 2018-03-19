@@ -4,6 +4,26 @@
 
     
   <url>
+    <loc>http://yoursite.com/2018/03/19/spring-cloud-start-to-give-up.html</loc>
+    <lastmod>2018-03-19T15:19:45.395Z</lastmod>
+    <data>
+        <display>
+        <title>浅谈服务治理、微服务与Service Mesh（二） Spring Cloud从入门到精通到放弃【转载】</title>
+        <pubTime>2018-03-19T14:36:59.000Z</pubTime>
+        
+        <tag>Spring Cloud</tag>
+         
+         
+           
+             
+              <breadCrumb title="微服务" url="http://yoursite.com/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://yoursite.com/2018/03/19/dubbo-past-and-present.html</loc>
     <lastmod>2018-03-19T14:03:11.860Z</lastmod>
     <data>
