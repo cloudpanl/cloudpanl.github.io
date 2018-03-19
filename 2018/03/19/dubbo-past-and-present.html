@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="panliang's blog."><meta name="keywords" content="Linux,Kubernetes,Docker,Microservices"><title>浅谈服务治理、微服务与Service Mesh（一）Dubbo的前世今生【转载】 | 每天进步一点点……</title><link rel="stylesheet" type="text/css" href="//fonts.neworld.org/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.1"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.1"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">浅谈服务治理、微服务与Service Mesh（一）Dubbo的前世今生【转载】</h1><a id="logo" href="/.">每天进步一点点……</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="Arama"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">浅谈服务治理、微服务与Service Mesh（一）Dubbo的前世今生【转载】</h1><div class="post-meta"><a href="/2018/03/19/dubbo-past-and-present.html#comments" class="comment-count"></a><p><span class="date">Mar 19, 2018</span><span><a href="/categories/微服务/" class="category">微服务</a></span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><p>本系列文章将为大家介绍当下最流行的服务治理、微服务等相关内容，从服务治理、SOA、微服务到最新的服务网格（Service Mesh）进行综合介绍和分析。易商阜极自2017年便积极引进微服务的先进理念，运用在项目实践中，为项目集成带来了显著效果。本文将以Dubbo为例，向为大家介绍SOA、服务治理等概念，以及Dubbo的基础知识和最新发展情况。</p>
+<h1 id="SOA与服务治理"><a href="#SOA与服务治理" class="headerlink" title="SOA与服务治理"></a>SOA与服务治理</h1><p>SOA（面向服务的体系结构）概念由来已久，在10多年前便开始进入到我们广大软件开发者的视线中。SOA是一种粗粒度、松耦合服务架构，服务之间通过简单、精确定义接口进行通讯，不涉及底层编程接口和通讯模型。SOA可以看作是B/S模型、Web Service技术之后的自然延伸。</p>
+<p>服务治理，也称为SOA治理，是指用来管理SOA的采用和实现的过程。以下是在2006年时IBM对于服务治理要点的总结：</p>
+<ul>
+<li>服务定义（服务的范围、接口和边界）</li>
+<li>服务部署生命周期（各个生命周期阶段）</li>
+<li>服务版本治理（包括兼容性）</li>
+<li>服务迁移（启用和退役）</li>
+<li>服务注册中心（依赖关系）</li>
+<li>服务消息模型（规范数据模型）</li>
+<li>服务监视（进行问题确定）</li>
+<li>服务所有权（企业组织）</li>
+<li>服务测试（重复测试）</li>
+<li>服务安全（包括可接受的保护范围）</li>
+</ul>
+<p>限于当时的技术发展水平，广大软件设计与开发人员对于SOA和服务治理的技术认知还主要停留在Web Service和ESB总线等技术和规范上，并没有真正在软件开发中得以充分落地。</p>
+<h1 id="Dubbo开源"><a href="#Dubbo开源" class="headerlink" title="Dubbo开源"></a>Dubbo开源</h1><p>直到2011年10月27日，阿里巴巴开源了自己的SOA服务化治理方案的核心框架Dubbo，服务治理和SOA的设计理念开始逐渐在国内软件行业中落地，并被广泛应用。<br>Dubbo作为阿里巴巴内部的SOA服务化治理方案的核心框架，在2012年时已经每天为2000+个服务提供3,000,000,000+次访问量支持，并被广泛应用于阿里巴巴集团的各成员站点。Dubbo自2011年开源后，已被许多非阿里系公司使用，其中既有当当网、网易考拉等互联网公司，也有中国人寿、青岛海尔等传统企业。</p>
+<h1 id="Dubbo简介"><a href="#Dubbo简介" class="headerlink" title="Dubbo简介"></a>Dubbo简介</h1><p>Dubbo是一个高性能服务框架，致力于提供高性能和透明化的RPC远程服务调用方案，以及SOA服务治理方案，使得应用可通过高性能RPC实现服务的输出和输入功能，和Spring框架可以无缝集成。</p>
+<p>作为一个分布式服务框架，以及SOA治理方案，Dubbo其功能主要包括：高性能NIO通讯及多协议集成，服务动态寻址与路由，软负载均衡与容错，依赖分析与服务降级等。Dubbo最大的特点是按照分层的方式来架构，使用这种方式可以使各个层之间解耦合（或者最大限度地松耦合）。从服务模型的角度来看，Dubbo采用的是一种非常简单的模型，要么是提供方提供服务，要么是消费方消费服务，所以基于这一点可以抽象出服务提供方（Provider）和服务消费方（Consumer）两个角色。</p>
+<p>Dubbo包含远程通讯、集群容错和自动发现三个核心部分。提供透明化的远程方法调用，实现像调用本地方法一样调用远程方法，只需简单配置，没有任何API侵入。同时具备软负载均衡及容错机制，可在内网替代F5等硬件负载均衡器，降低成本，减少单点。可以实现服务自动注册与发现，不再需要写死服务提供方地址，注册中心基于接口名查询服务提供者的IP地址，并且能够平滑添加或删除服务提供者。</p>
+<p>下图来自从Dubbo官网，描述了服务注册中心、服务提供方、服务消费方、服务监控中心之间的调用关系，具体如下图所示：<br><img src="http://dockone.io/uploads/article/20180124/11a8ad251bf0ae6577eead936add06e7.png" alt=""></p>
+<p>节点角色说明：<br><img src="http://dockone.io/uploads/article/20180124/2c69dfd83dd060315be04574dbcc48c9.png" alt=""></p>
+<p>调用关系说明：</p>
+<ol>
+<li>服务容器负责启动，加载，运行服务提供者。</li>
+<li>服务提供者在启动时，向注册中心注册自己提供的服务。</li>
+<li>服务消费者在启动时，向注册中心订阅自己所需的服务。</li>
+<li>注册中心返回服务提供者地址列表给消费者，如果有变更，注册中心将基于长连接推送变更数据给消费者。</li>
+<li>服务消费者，从提供者地址列表中，基于软负载均衡算法，选一台提供者进行调用，如果调用失败，再选另一台调用。</li>
+<li>服务消费者和提供者，在内存中累计调用次数和调用时间，定时每分钟发送一次统计数据到监控中心。</li>
+</ol>
+<h1 id="Dubbo总体架构"><a href="#Dubbo总体架构" class="headerlink" title="Dubbo总体架构"></a>Dubbo总体架构</h1><p>Dubbo框架设计共划分了10层，最上面的Service层是留给实际使用Dubbo开发分布式服务的开发者实现业务逻辑的接口层。图中左边淡蓝背景的为服务消费方使用的接口，右边淡绿色背景的为服务提供方使用的接口，位于中轴线上的为双方都用到的接口。</p>
+<p><img src="http://dockone.io/uploads/article/20180124/8349c5fc87fef048bb26ea6b277eee4d.png" alt=""></p>
+<p>各层说明：</p>
+<ul>
+<li>Config配置层：对外配置接口，以ServiceConfig、ReferenceConfig为中心，可以直接初始化配置类，也可以通过Spring解析配置生成配置类。</li>
+<li>Proxy服务代理层：服务接口透明代理，生成服务的客户端Stub和服务器端Skeleton，以ServiceProxy为中心，扩展接口为ProxyFactory。</li>
+<li>Registry注册中心层：封装服务地址的注册与发现，以服务URL为中心，扩展接口为RegistryFactory、Registry、RegistryService。</li>
+<li>Cluster路由层：封装多个提供者的路由及负载均衡，并桥接注册中心，以Invoker为中心，扩展接口为Cluster、Directory、Router、LoadBalance。</li>
+<li>Monitor监控层：RPC调用次数和调用时间监控，以Statistics为中心，扩展接口为MonitorFactory、Monitor、MonitorService。</li>
+<li>Protocol远程调用层：封将RPC调用，以Invocation、Result为中心，扩展接口为Protocol、Invoker、Exporter。</li>
+<li>Exchange信息交换层：封装请求响应模式，同步转异步，以Request、Response为中心，扩展接口为Exchanger、ExchangeChannel、ExchangeClient、ExchangeServer。</li>
+<li>Transport网络传输层：抽象MINA和Netty为统一接口，以Message为中心，扩展接口为Channel、Transporter、Client、Server、Codec。</li>
+<li>Serialize数据序列化层：可复用的一些工具，扩展接口为Serialization、ObjectInput、ObjectOutput、ThreadPool。</li>
+</ul>
+<h1 id="模块分包"><a href="#模块分包" class="headerlink" title="模块分包"></a>模块分包</h1><p><img src="http://dockone.io/uploads/article/20180124/3b191f3699ee69601a87bb6f0864f18f.png" alt=""></p>
+<p>各模块说明：</p>
+<ul>
+<li>dubbo-common公共逻辑模块：包括Util类和通用模型。</li>
+<li>dubbo-remoting远程通讯模块：相当于Dubbo协议的实现，如果RPC用 RMI协议则不需要使用此包。</li>
+<li>dubbo-rpc远程调用模块：抽象各种协议，以及动态代理，只包含一对一的调用，不关心集群的管理。</li>
+<li>dubbo-cluster集群模块：将多个服务提供方伪装为一个提供方，包括：负载均衡、容错、路由等，集群的地址列表可以是静态配置的，也可以是由注册中心下发。</li>
+<li>dubbo-registry注册中心模块：基于注册中心下发地址的集群方式，以及对各种注册中心的抽象。</li>
+<li>dubbo-monitor监控模块：统计服务调用次数、调用时间的、调用链跟踪的服务。</li>
+<li>dubbo-config配置模块：是Dubbo对外的API，用户通过Config使用Dubbo，隐藏Dubbo所有细节。</li>
+<li>dubbo-container容器模块：是一个Standlone的容器，以简单的Main加载Spring启动，因为服务通常不需要Tomcat/JBoss等Web容器的特性，没必要用Web容器去加载服务。</li>
+</ul>
+<h1 id="协议支持"><a href="#协议支持" class="headerlink" title="协议支持"></a>协议支持</h1><ul>
+<li>Dubbo协议（默认协议）</li>
+<li>Hessian协议</li>
+<li>HTTP协议</li>
+<li>RMI协议</li>
+<li>WebService协议</li>
+<li>Thrift协议</li>
+<li>Memcached协议</li>
+<li>Redis协议</li>
+</ul>
+<h1 id="注册中心"><a href="#注册中心" class="headerlink" title="注册中心"></a>注册中心</h1><h2 id="（1）Multicast注册中心："><a href="#（1）Multicast注册中心：" class="headerlink" title="（1）Multicast注册中心："></a>（1）Multicast注册中心：</h2><p>Multicast注册中心不需要启动任何中心节点，只要广播地址一样，就可以互相发现。组播受网络结构限制，只适合小规模应用或开发阶段使用。组播地址段：224.0.0.0 - 239.255.255.255。</p>
+<h2 id="（2）ZooKeeper注册中心（推荐）："><a href="#（2）ZooKeeper注册中心（推荐）：" class="headerlink" title="（2）ZooKeeper注册中心（推荐）："></a>（2）ZooKeeper注册中心（推荐）：</h2><p>ZooKeeper是Apacahe子项目，是一个树型的目录服务，支持变更推送，适合作为Dubbo服务的注册中心，可用于生产环境。</p>
+<p><img src="http://dockone.io/uploads/article/20180124/fe00d79623628e628f64e13bba33616c.png" alt=""></p>
+<p>对上图流程说明如下：</p>
+<ol>
+<li>服务提供者（Provider）启动时，向/dubbo/com.foo.BarService/providers目录下写入URL。</li>
+<li>服务消费者（Consumer）启动时，订阅/dubbo/com.foo.BarService/providers目录下的URL，向/dubbo/com.foo.BarService/consumers目录下写入自己的URL。</li>
+<li>监控中心（Monitor）启动时，订阅/dubbo/com.foo.BarService目录下的所有提供者和消费者URL。</li>
+</ol>
+<h2 id="（3）Redis注册中心："><a href="#（3）Redis注册中心：" class="headerlink" title="（3）Redis注册中心："></a>（3）Redis注册中心：</h2><p>阿里内部并没有采用Redis做为注册中心，而是使用自己实现的基于数据库的注册中心，即：Redis注册中心并没有在阿里内部长时间运行的可靠性保障，此Redis桥接实现只为开源版本提供，其可靠性依赖于Redis本身的可靠性。</p>
+<h2 id="（4）Simple注册中心："><a href="#（4）Simple注册中心：" class="headerlink" title="（4）Simple注册中心："></a>（4）Simple注册中心：</h2><p>Simple注册中心本身就是一个普通的Dubbo服务，可以减少第三方依赖，使整体通讯方式一致。只是简单实现，不支持集群，可作为自定义注册中心的参考，但不适合直接用于生产环境。</p>
+<h1 id="远程通信与信息交换"><a href="#远程通信与信息交换" class="headerlink" title="远程通信与信息交换"></a>远程通信与信息交换</h1><p>远程通信需要指定通信双方所约定的协议，在保证通信双方理解协议语义的基础上，还要保证高效、稳定的消息传输。Dubbo继承了当前主流的网络通信框架，主要包括如下几个：</p>
+<ul>
+<li>Mina</li>
+<li>Netty（默认）</li>
+<li>Grizzly</li>
+</ul>
+<h1 id="停止维护"><a href="#停止维护" class="headerlink" title="停止维护"></a>停止维护</h1><p>从2012年10月23日Dubbo 2.5.3发布后，在Dubbo开源将满一周年之际，阿里基本停止了对Dubbo的主要升级。只在之后的2013年和2014年更新过2次对Dubbo 2.4的维护版本，然后停止了所有维护工作。Dubbo对Srping的支持也停留在了Spring 2.5.6版本上。</p>
+<h1 id="分支出现"><a href="#分支出现" class="headerlink" title="分支出现"></a>分支出现</h1><p>在阿里停止维护和升级Dubbo期间，当当网开始维护自己的Dubbo分支版本Dubbox，支持了新版本的Spring，并对外开源了Dubbox。同时，网易考拉也维护了自己的独立分支Dubbok，可惜并未对外开源。</p>
+<h1 id="重获新生"><a href="#重获新生" class="headerlink" title="重获新生"></a>重获新生</h1><p>经过多年漫长的等待，随着微服务的火热兴起，在国内外开发者对阿里不再升级维护Dubbo的吐槽声中，阿里终于开始重新对Dubbo的升级和维护工作。在2017年9月7日 ，阿里发布了Dubbo的2.5.4版本，距离上一个版本2.5.3发布已经接近快5年时间了。在随后的几个月中，阿里Dubbo开发团队以差不多每月一版本的速度开始快速升级迭代，修补了Dubbo老版本多年来存在的诸多bug，并对Spring等组件的支持进行了全面升级。</p>
+<h1 id="分支合并"><a href="#分支合并" class="headerlink" title="分支合并"></a>分支合并</h1><p>在2018年1月8日，Dubbo 2.6.0版本发布，新版本将之前当当网开源的Dubbo分支Dubbox进行了合并，实现了Dubbo版本的统一整合。</p>
+<h1 id="Dubbo与Spring-Cloud"><a href="#Dubbo与Spring-Cloud" class="headerlink" title="Dubbo与Spring Cloud"></a>Dubbo与Spring Cloud</h1><p>阿里巴巴负责主导了 Dubbo 重启维护的研发工程师刘军在接受采访时表示：当前由于 RPC 协议、注册中心元数据不匹配等问题，在面临微服务基础框架选型时Dubbo与Spring Cloud是只能二选一，这也是为什么大家总是拿Dubbo和Spring Cloud做对比的原因之一。Dubbo之后会积极寻求适配到Spring Cloud生态，比如作为Spring Cloud的二进制通信方案来发挥Dubbo的性能优势，或者Dubbo通过模块化以及对http的支持适配到Spring Cloud。</p>
+<h1 id="未来展望"><a href="#未来展望" class="headerlink" title="未来展望"></a>未来展望</h1><p>2018年1月8日，Dubbo创始人之一梁飞在Dubbo交流群里透露了Dubbo 3.0正在动工的消息。Dubbo 3.0内核与Dubbo 2.0完全不同，但兼容Dubbo 2.0。Dubbo 3.0将以Streaming为内核，不再是Dubbo时代的RPC，但是RPC会在Dubbo 3.0中变成远程Streaming对接的一种可选形态。Dubbo 3.0将支持可选Service Mesh，多加一层IPC，这主要是为了兼容老系统，而内部则会优先尝试内嵌模式。代理模式Ops可独立升级框架，减少业务侵入，而内嵌模式可以带业务测试、部署节点少、稳定性检测方便。同时，可以将Dubbo 3.0启动为独立进程，由dubbo-mesh进行IPC，路由、负载均衡和熔断机制将由独立进程控制。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>从 Dubbo 新版本的路线规划上可以看出，新版本的Dubbo在原有服务治理的功能基础上，将全面拥抱微服务和Service Mesh。同时，考虑到在阿里云已经有了Dubbo的商业版本，在未来一段时间内，Dubbo的更新与维护应该不会再长时间中断。在我们进行服务治理以及微服务架构设计时，新版本Dubbo对我们广大开发者来说都将会是一个不错的选择。</p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><ul>
+<li><a href="http://dubbo.io" target="_blank" rel="noopener">http://dubbo.io</a></li>
+<li><a href="https://github.com/alibaba/dubbo" target="_blank" rel="noopener">https://github.com/alibaba/dubbo</a></li>
+<li><a href="http://shiyanjun.cn/archives/325.html" target="_blank" rel="noopener">http://shiyanjun.cn/archives/325.html</a></li>
+<li><a href="http://mp.weixin.qq.com/s/eVYx-tUIMYtAk5wP-qkdkw" target="_blank" rel="noopener">http://mp.weixin.qq.com/s/eVYx-tUIMYtAk5wP-qkdkw</a></li>
+</ul>
+<p>原文链接：<a href="https://mp.weixin.qq.com/s?__biz=MjM5MDM3NDY1NQ==&amp;mid=2651112485&amp;idx=2&amp;sn=584285b2c52e59a4957bf50079ce41e4&amp;chksm=bdb5abb58ac222a3b1a62ae9d40a66a14e05b9bc101f50a30abfcf8e38a8e0a6ac233e985a8c&amp;mpshare=1&amp;scene=1&amp;srcid=0124lduJyZ5omV9YJHbcTVSk&amp;pass_ticket=zauggU5Vx7VPre9Q8e8%2BSi0sDlvU6Gr3Jg%2F%2BrZ9BVX5EtWQ9Mf%2B%2Bch2jYuJEjOeL#rd" target="_blank" rel="noopener">浅谈服务治理、微服务与Service Mesh（一）Dubbo的前世今生</a></p>
+</div><div class="tags"><a href="/tags/Dubbo-Service-Mesh-微服务-ZooKeeper/">Dubbo,Service Mesh,微服务,ZooKeeper</a></div><div class="post-share"><div class="bdsharebuttonbox"><span style="float:left;line-height: 28px;height: 28px;font-size:16px;font-weight:blod">分享到：</span><a href="#" data-cmd="more" class="bds_more"></a><a href="#" data-cmd="mshare" title="分享到一键分享" class="bds_mshare"></a><a href="#" data-cmd="fbook" title="分享到Facebook" class="bds_fbook"></a><a href="#" data-cmd="twi" title="分享到Twitter" class="bds_twi"></a><a href="#" data-cmd="linkedin" title="分享到linkedin" class="bds_linkedin"></a><a href="#" data-cmd="youdao" title="分享到有道云笔记" class="bds_youdao"></a><a href="#" data-cmd="evernotecn" title="分享到印象笔记" class="bds_evernotecn"></a><a href="#" data-cmd="weixin" title="分享到微信" class="bds_weixin"></a><a href="#" data-cmd="qzone" title="分享到QQ空间" class="bds_qzone"></a><a href="#" data-cmd="tsina" title="分享到新浪微博" class="bds_tsina"></a></div></div><div class="post-nav"><a href="/2018/03/18/choosing-a-linux-tracer.html" class="next">如何选择 Linux 上的跟踪器</a></div><div id="comments"></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#SOA与服务治理"><span class="toc-text">SOA与服务治理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Dubbo开源"><span class="toc-text">Dubbo开源</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Dubbo简介"><span class="toc-text">Dubbo简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Dubbo总体架构"><span class="toc-text">Dubbo总体架构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#模块分包"><span class="toc-text">模块分包</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#协议支持"><span class="toc-text">协议支持</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#注册中心"><span class="toc-text">注册中心</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#（1）Multicast注册中心："><span class="toc-text">（1）Multicast注册中心：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#（2）ZooKeeper注册中心（推荐）："><span class="toc-text">（2）ZooKeeper注册中心（推荐）：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#（3）Redis注册中心："><span class="toc-text">（3）Redis注册中心：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#（4）Simple注册中心："><span class="toc-text">（4）Simple注册中心：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#远程通信与信息交换"><span class="toc-text">远程通信与信息交换</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#停止维护"><span class="toc-text">停止维护</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#分支出现"><span class="toc-text">分支出现</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#重获新生"><span class="toc-text">重获新生</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#分支合并"><span class="toc-text">分支合并</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Dubbo与Spring-Cloud"><span class="toc-text">Dubbo与Spring Cloud</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#未来展望"><span class="toc-text">未来展望</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考链接"><span class="toc-text">参考链接</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/03/19/dubbo-past-and-present.html">浅谈服务治理、微服务与Service Mesh（一）Dubbo的前世今生【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/18/choosing-a-linux-tracer.html">如何选择 Linux 上的跟踪器</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-gui"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/微服务/">微服务</a><span class="category-list-count">1</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/Dubbo-Service-Mesh-微服务-ZooKeeper/" style="font-size: 15px;">Dubbo,Service Mesh,微服务,ZooKeeper</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a></li></ul></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">Baidu Site Haritası</a> |  <a href="/atom.xml">订阅</a> |  <a href="/about/">关于</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次</p><p><span> Copyright &copy;<a href="/." rel="nofollow">Cloudpanl.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?8c06a0cc670571138e4a33bce0d3167a";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+  })();
+</script><script type="text/javascript" src="/js/search.json.js?v=2.0.1"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.1" async></script><script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":["mshare","weixin","tsina","qzone","linkedin","fbook","twi","print","renren","sqq","evernotecn","bdysc","tqq","tqf","bdxc","kaixin001","tieba","douban","bdhome","thx","ibaidu","meilishuo","mogujie","diandian","huaban","duitang","hx","fx","youdao","sdo","qingbiji","people","xinhua","mail","isohu","yaolan","wealink","ty","iguba","h163","copy"],"bdPic":"","bdStyle":"1","bdSize":"16"},"share":{},"image":{"viewList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"],"viewText":"分享到：","viewSize":"16"},"selectShare":{"bdContainerClass":null,"bdSelectMiniList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"]}};with(document)0[(getElementsByTagName('head')[0]||head).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script></body></html>
