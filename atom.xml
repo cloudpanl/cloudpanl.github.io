@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-03-19T15:19:45.395Z</updated>
+  <updated>2018-03-22T15:00:25.509Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>初探Jenkins X</title>
+    <link href="http://yoursite.com/2018/03/21/Preliminary-Jenkins-X.html"/>
+    <id>http://yoursite.com/2018/03/21/Preliminary-Jenkins-X.html</id>
+    <published>2018-03-21T13:42:25.000Z</published>
+    <updated>2018-03-22T15:00:25.509Z</updated>
+    
+    <content type="html"><![CDATA[<p>Jenkins 于 3月21日 发布了名为Jenkins X的项目，这一项目对开发人员和云端的 CI/CD 环境之间的交互过程进行了审视和反思，结合自动化、工具链以及 DevOps 最佳实践。为开发团队提供了新的生产效率增长点。</p><h1 id="Jenkins-X是什么？"><a href="#Jenkins-X是什么？" class="headerlink" title="Jenkins X是什么？"></a>Jenkins X是什么？</h1><p>“X”注定是一个不平凡的名字，Jenkins X 对于整个Jenkins生态而言也是不平凡的存在。</p><p>简而言之，<strong>Jenkins X 是一个高度集成化的CI/CD平台，基于Jenkins和Kubernetes实现，旨在解决微服务体系架构下的云原生应用的持续交付的问题，简化整个云原生应用的开发、运行和部署过程。</strong></p><p>你猜的没错，Jenkins X 只能在Kubernetes集群上运行，这有并不意外。Kubernetes已然成为了容器编排的一枝独秀，各大厂商纷纷转向Kubernetes，发布了自己的公有云、操作系统或PaaS平台。</p><p>另外，微服务和云原生应用解决方案也日臻成熟，以Spring Boot为代表的一系列体系框架也开始走到舞台中央。</p><p>与此同时，随着应用架构的细分和服务间的解耦，服务具备了独立发布的能力，这也使得微服务架构下的持续交付成为业界所关注的热门领域，我们需要更加灵活的CI/CD自动化解决方案，以应对越发快速的交付需求。</p><p><img src="https://res.cloudinary.com/cloudpanl/image/upload/v1521727776/Preliminary-Jenkins-X-1.jpg" alt=""></p><blockquote><p>注：Jenkins的企业版CloudBees，已经加入CNCF（云原生计算）基金会</p></blockquote><p>看到这里，你是不是觉得Jenkins X 就是个基于Kubernetes的持续交付平台呢？</p><p>那你就大错特错了，因为Jenkins X想要实现的远非如此而已！</p><p>试想如下场景：</p><blockquote><p>越来越多的工具和实践，工程师们需要会写Kubernetes YAML，Dockerfile，Jenkinsfile，对微服务、云原生、Kubernetes和Jenkins非常熟悉。</p></blockquote><blockquote><p>臣妾做不到呀！</p></blockquote><p>而在Jenkins X的世界中，这一切都是通过命令完成。</p><p>可以说<strong>Jenkins X重新思考了未来云原生应用下研发工程师和CI/CD的交付方式</strong>，通过整合工具，自动化和DevOps最佳实践，改善了研发过程中的复杂环节，让研发可以专注于价值创造，其他的事情通通交给Jenkins X来帮你解决。</p><p>神奇吗？</p><p>的确，在第一次看到项目演示的时候，我也惊叹世界的变化如此之快，在Jenkins X的设计中，整合了Helm，Draft，GitOps，以及Nexus，chartmuseum，monocular等诸多新系统和工具，从而实现自动构建编译环境，生成容器镜像，流水线，自动化部署，并通过简单的Review实现不同环境间的自动发布。</p><p>这一切都被完美的封装在简单的jx命令之后。同时你也无需担心对内部实现细节的失控，因为一切都被妥善的版本控制，可以自定义和修改，可以说Jenkins X为你实现了自动化的CI/CD和DevOps最佳实践，持续交付不再是难事，进而提升生产力，实现促进企业的业务成功！</p><p><img src="https://res.cloudinary.com/cloudpanl/image/upload/v1521728048/preliminary-jenkins-x-2.jpg" alt=""></p><h1 id="Jenkins-X-部分新特性"><a href="#Jenkins-X-部分新特性" class="headerlink" title="Jenkins X 部分新特性"></a>Jenkins X 部分新特性</h1><h2 id="1-自动化一切：自动化CI-CD流水线"><a href="#1-自动化一切：自动化CI-CD流水线" class="headerlink" title="1. 自动化一切：自动化CI/CD流水线"></a>1. 自动化一切：自动化CI/CD流水线</h2><ol><li>选择项目类型自动生成Jenkinsfile定义流水线</li><li>自动生成Dockerfile并打包容器镜像</li><li>自动创建Helm Chart并运行在Kubernetes集群</li><li>自动关联代码库和流水线，作为代码变更自动触发（基于Webhook实现）</li><li>自动版本号自动归档</li></ol><h2 id="2-Review代码一键部署应用：基于GitOps的环境部署"><a href="#2-Review代码一键部署应用：基于GitOps的环境部署" class="headerlink" title="2. Review代码一键部署应用：基于GitOps的环境部署"></a>2. Review代码一键部署应用：基于GitOps的环境部署</h2><ol><li>所有的环境，应用列表，版本，配置信息统一放在代码库中进行版本控制</li><li>通过Pull Request实现研发和运维的协同，完成应用部署升级（Promotion）</li><li>可自动部署和手动部署，在必要的时候增加手工Review</li><li>当然这些都封装在jx命令中实现</li></ol><p><img src="https://res.cloudinary.com/cloudpanl/image/upload/v1521728214/preliminary-jenkins-x-3.jpg" alt=""></p><h2 id="3-自动生成预览环境和信息同步反馈"><a href="#3-自动生成预览环境和信息同步反馈" class="headerlink" title="3. 自动生成预览环境和信息同步反馈"></a>3. 自动生成预览环境和信息同步反馈</h2><ol><li>预览环境用于代码Review环节中临时创建</li><li>同Pull Request工作流程集成并实现信息同步和有效通知</li><li>验证完毕后自动清理</li><li>提交和应用状态自动同步到Github注释</li><li>自动生成release notes信息供验证</li></ol><h1 id="Jenkins-X-核心组件"><a href="#Jenkins-X-核心组件" class="headerlink" title="Jenkins X 核心组件"></a>Jenkins X 核心组件</h1><p><img src="https://res.cloudinary.com/cloudpanl/image/upload/v1521728362/Preliminary-Jenkins-X-4.jpg" alt=""></p><h2 id="Jenkins"><a href="#Jenkins" class="headerlink" title="Jenkins"></a>Jenkins</h2><p>Jenkins X不是一个全新的Jenkins。</p><p>他依然使用Jenkins作为持续交付的核心引擎，实际上Jenkins X作为Jenkins的一个子项目存在，专注于云原生应用的CI/CD实现，同时也帮助Jenkins自身完成云原生应用的转型，毕竟现在越来越多的人在诟病单体应用的设计和文件存储系统。</p><p>在之前同Jenkins创始人和核心骨干的交流中，我们也了解到Jenkins已经开始着手改变。</p><h2 id="HELM"><a href="#HELM" class="headerlink" title="HELM"></a>HELM</h2><p>Helm是用于管理Kubernetes资源对象的工具，类似APT，YUM和HOMEBREW，他通过将Kubernetes的资源对象打包成Chart的形式，完成复杂应用的部署和版本控制，是目前业界流行的解决方案</p><h2 id="DRAFT"><a href="#DRAFT" class="headerlink" title="DRAFT"></a>DRAFT</h2><p>Draft是自动化应用构建和运行在Kubernetes上面的工具，具有语言识别能力，能够自动生成构建脚本，依赖，环境并打包成docker镜像并部署在Kubernetes集群上，加快代码开发节奏，而无需关心基础设施层面的技术实现</p><h2 id="GitOps"><a href="#GitOps" class="headerlink" title="GitOps"></a>GitOps</h2><p>GitOps是weaveworks推出的天才的应用部署解决方案，他将Git作为整个应用部署的单一可信数据源（SSOT），通过类似代码开发的Pull Request流程完成应用部署的Review和自动化实现，并且将部署配置信息纳入版本控制。</p><p><img src="https://res.cloudinary.com/cloudpanl/image/upload/v1521728496/Preliminary-Jenkins-X-5.jpg" alt=""></p><h1 id="Jenkins-X-安装试用"><a href="#Jenkins-X-安装试用" class="headerlink" title="Jenkins X 安装试用"></a>Jenkins X 安装试用</h1><h2 id="先决条件"><a href="#先决条件" class="headerlink" title="先决条件"></a>先决条件</h2><p><strong>工具</strong></p><ul><li>helm</li><li>kubectl</li><li>git</li></ul><p><strong>Kubernetes 集群</strong></p><ul><li>互联网连接</li><li>Tiller</li><li>公网 IP</li></ul><p><strong>github 账号</strong></p><h2 id="安装-jx"><a href="#安装-jx" class="headerlink" title="安装 jx"></a>安装 jx</h2><p><a href="http://jenkins-x.io/getting-started/install/" target="_blank" rel="noopener">http://jenkins-x.io/getting-started/install/</a> 提供了几种系统下的安装说明：</p><ul><li>OS X：<code>brew tap jenkins-x/jx &amp;&amp; brew tap jenkins-x/jx</code></li><li>Linux：<code>curl -L https://github.com/jenkins-x/jx/releases/download/v1.1.10/jx-darwin-amd64.tar.gz | tar xzv &amp;&amp; mv jx /usr/local/bin</code></li></ul><h2 id="jx-install"><a href="#jx-install" class="headerlink" title="jx install"></a>jx install</h2><p><code>jx create cluster</code> 支持多种公有云的创建。</p><p>配置好集群和对应的 kubeconfig 访问之后，就可以使用jx install进行安装了。</p><p>过程中几个需要注意的点：</p><ul><li>如果 Tiller 的 SA 权限不足，会导致安装失败，可设置相应的 ClusterRole 进行解决。</li><li>安装过程会修改 kubeconfig 文件，因此建议做好备份。</li><li>为完整体验功能，建议听从安装器建议，安装 Ingress Controller。</li><li>Jenkins X 的环境管理以及代码拉取等功能需要和 Github 进行交互，因此会提问 GitHub 的 Token。</li><li>安装过程相对较长，可以使用<code>watch kubectl get pods -n jx</code>查看进程状况。</li><li>最后步骤会显示管理密码，注意复制保存。</li></ul><h2 id="安装完成"><a href="#安装完成" class="headerlink" title="安装完成"></a>安装完成</h2><p>JX 会为用户建立三个环境分别是，Dev、Staging 以及 Production。</p><p>运行命令<code>jx console</code>，会打开浏览器进入 Jenkins 登录页面。</p><p>登录之后我们会看到正在进行构建，如果是一个排队状态，可能是因为正在创建 Worker Pod，可以使用kubectl查询具体情况。</p><p>构建完成，会看到这一示例中包含了拉取、构建、Helm、环境等几个步骤，可以作为工作的基础环节来进行使用。</p><p><img src="https://res.cloudinary.com/cloudpanl/image/upload/v1521730673/Preliminary-Jenkins-X-6.jpg" alt=""></p><h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><p>接下来就可以做几个善后工作</p><ol><li>jx 支持插件，可以通过jx get addons查看支持的插件列表，进行安装。</li><li>根据实际工作需要，对缺省环境进行调整，安装所需软件。</li><li>对 Jenkins X 中的软件、集群进行安全加固。</li><li>使用import或者create spring/create quickstart，进行项目工作。</li><li>最后要注意的一点是，Jenkins X 目前的升级频率非常高。不建议生产使用。</li></ol>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;Jenkins 于 3月21日 发布了名为Jenkins X的项目，这一项目对开发人员和云端的 CI/CD 环境之间的交互过程进行了审视和反思，结合自动化、工具链以及 DevOps 最佳实践。为开发团队提供了新的生产效率增长点。&lt;/p&gt;
+&lt;h1 id=&quot;Jenkins-X是
+      
+    
+    </summary>
+    
+      <category term="Jenkins" scheme="http://yoursite.com/categories/Jenkins/"/>
+    
+    
+      <category term="Jenkins" scheme="http://yoursite.com/tags/Jenkins/"/>
+    
+  </entry>
   
   <entry>
     <title>浅谈服务治理、微服务与Service Mesh（二） Spring Cloud从入门到精通到放弃【转载】</title>

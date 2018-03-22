@@ -4,6 +4,26 @@
 
     
   <url>
+    <loc>http://yoursite.com/2018/03/21/Preliminary-Jenkins-X.html</loc>
+    <lastmod>2018-03-22T15:00:25.509Z</lastmod>
+    <data>
+        <display>
+        <title>初探Jenkins X</title>
+        <pubTime>2018-03-21T13:42:25.000Z</pubTime>
+        
+        <tag>Jenkins</tag>
+         
+         
+           
+             
+              <breadCrumb title="Jenkins" url="http://yoursite.com/categories/Jenkins/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://yoursite.com/2018/03/19/spring-cloud-start-to-give-up.html</loc>
     <lastmod>2018-03-19T15:19:45.395Z</lastmod>
     <data>

@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2018/03/21/Preliminary-Jenkins-X.html</loc>
+    
+    <lastmod>2018-03-22T15:00:25.509Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/03/19/spring-cloud-start-to-give-up.html</loc>
     
     <lastmod>2018-03-19T15:19:45.395Z</lastmod>
