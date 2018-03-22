@@ -13,8 +13,6 @@
 <p>试想如下场景：</p>
 <blockquote>
 <p>越来越多的工具和实践，工程师们需要会写Kubernetes YAML，Dockerfile，Jenkinsfile，对微服务、云原生、Kubernetes和Jenkins非常熟悉。</p>
-</blockquote>
-<blockquote>
 <p>臣妾做不到呀！</p>
 </blockquote>
 <p>而在Jenkins X的世界中，这一切都是通过命令完成。</p>
@@ -23,27 +21,27 @@
 <p>的确，在第一次看到项目演示的时候，我也惊叹世界的变化如此之快，在Jenkins X的设计中，整合了Helm，Draft，GitOps，以及Nexus，chartmuseum，monocular等诸多新系统和工具，从而实现自动构建编译环境，生成容器镜像，流水线，自动化部署，并通过简单的Review实现不同环境间的自动发布。</p>
 <p>这一切都被完美的封装在简单的jx命令之后。同时你也无需担心对内部实现细节的失控，因为一切都被妥善的版本控制，可以自定义和修改，可以说Jenkins X为你实现了自动化的CI/CD和DevOps最佳实践，持续交付不再是难事，进而提升生产力，实现促进企业的业务成功！</p>
 <p><img src="https://res.cloudinary.com/cloudpanl/image/upload/v1521728048/preliminary-jenkins-x-2.jpg" alt=""></p>
-<h1 id="Jenkins-X-部分新特性"><a href="#Jenkins-X-部分新特性" class="headerlink" title="Jenkins X 部分新特性"></a>Jenkins X 部分新特性</h1><h2 id="1-自动化一切：自动化CI-CD流水线"><a href="#1-自动化一切：自动化CI-CD流水线" class="headerlink" title="1. 自动化一切：自动化CI/CD流水线"></a>1. 自动化一切：自动化CI/CD流水线</h2><ol>
+<h1 id="Jenkins-X-部分新特性"><a href="#Jenkins-X-部分新特性" class="headerlink" title="Jenkins X 部分新特性"></a>Jenkins X 部分新特性</h1><h2 id="1-自动化一切：自动化CI-CD流水线"><a href="#1-自动化一切：自动化CI-CD流水线" class="headerlink" title="1. 自动化一切：自动化CI/CD流水线"></a>1. 自动化一切：自动化CI/CD流水线</h2><ul>
 <li>选择项目类型自动生成Jenkinsfile定义流水线</li>
 <li>自动生成Dockerfile并打包容器镜像</li>
 <li>自动创建Helm Chart并运行在Kubernetes集群</li>
 <li>自动关联代码库和流水线，作为代码变更自动触发（基于Webhook实现）</li>
 <li>自动版本号自动归档</li>
-</ol>
-<h2 id="2-Review代码一键部署应用：基于GitOps的环境部署"><a href="#2-Review代码一键部署应用：基于GitOps的环境部署" class="headerlink" title="2. Review代码一键部署应用：基于GitOps的环境部署"></a>2. Review代码一键部署应用：基于GitOps的环境部署</h2><ol>
+</ul>
+<h2 id="2-Review代码一键部署应用：基于GitOps的环境部署"><a href="#2-Review代码一键部署应用：基于GitOps的环境部署" class="headerlink" title="2. Review代码一键部署应用：基于GitOps的环境部署"></a>2. Review代码一键部署应用：基于GitOps的环境部署</h2><ul>
 <li>所有的环境，应用列表，版本，配置信息统一放在代码库中进行版本控制</li>
 <li>通过Pull Request实现研发和运维的协同，完成应用部署升级（Promotion）</li>
 <li>可自动部署和手动部署，在必要的时候增加手工Review</li>
 <li>当然这些都封装在jx命令中实现</li>
-</ol>
+</ul>
 <p><img src="https://res.cloudinary.com/cloudpanl/image/upload/v1521728214/preliminary-jenkins-x-3.jpg" alt=""></p>
-<h2 id="3-自动生成预览环境和信息同步反馈"><a href="#3-自动生成预览环境和信息同步反馈" class="headerlink" title="3. 自动生成预览环境和信息同步反馈"></a>3. 自动生成预览环境和信息同步反馈</h2><ol>
+<h2 id="3-自动生成预览环境和信息同步反馈"><a href="#3-自动生成预览环境和信息同步反馈" class="headerlink" title="3. 自动生成预览环境和信息同步反馈"></a>3. 自动生成预览环境和信息同步反馈</h2><ul>
 <li>预览环境用于代码Review环节中临时创建</li>
 <li>同Pull Request工作流程集成并实现信息同步和有效通知</li>
 <li>验证完毕后自动清理</li>
 <li>提交和应用状态自动同步到Github注释</li>
 <li>自动生成release notes信息供验证</li>
-</ol>
+</ul>
 <h1 id="Jenkins-X-核心组件"><a href="#Jenkins-X-核心组件" class="headerlink" title="Jenkins X 核心组件"></a>Jenkins X 核心组件</h1><p><img src="https://res.cloudinary.com/cloudpanl/image/upload/v1521728362/Preliminary-Jenkins-X-4.jpg" alt=""></p>
 <h2 id="Jenkins"><a href="#Jenkins" class="headerlink" title="Jenkins"></a>Jenkins</h2><p>Jenkins X不是一个全新的Jenkins。</p>
 <p>他依然使用Jenkins作为持续交付的核心引擎，实际上Jenkins X作为Jenkins的一个子项目存在，专注于云原生应用的CI/CD实现，同时也帮助Jenkins自身完成云原生应用的转型，毕竟现在越来越多的人在诟病单体应用的设计和文件存储系统。</p>
