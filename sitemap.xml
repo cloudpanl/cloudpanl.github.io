@@ -2,9 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2018/03/23/Pipeline-syntax.html</loc>
+    
+    <lastmod>2018-03-23T10:16:46.194Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/03/22/Jenkins-Pipeline.html</loc>
     
-    <lastmod>2018-03-23T06:09:30.586Z</lastmod>
+    <lastmod>2018-03-23T09:34:23.393Z</lastmod>
     
   </url>
   
