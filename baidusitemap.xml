@@ -4,6 +4,26 @@
 
     
   <url>
+    <loc>http://yoursite.com/2018/03/22/Jenkins-Pipeline.html</loc>
+    <lastmod>2018-03-23T06:09:30.586Z</lastmod>
+    <data>
+        <display>
+        <title>Jenkins Pipeline</title>
+        <pubTime>2018-03-22T05:02:36.000Z</pubTime>
+        
+        <tag>Pipeline</tag>
+         
+         
+           
+             
+              <breadCrumb title="Jenkins" url="http://yoursite.com/categories/Jenkins/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://yoursite.com/2018/03/21/Preliminary-Jenkins-X.html</loc>
     <lastmod>2018-03-22T15:07:37.764Z</lastmod>
     <data>

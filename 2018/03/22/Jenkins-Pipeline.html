@@ -1,0 +1,299 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="panliang's blog."><meta name="keywords" content="Linux,Kubernetes,Docker,Microservices"><title>Jenkins Pipeline | 每天进步一点点……</title><link rel="stylesheet" type="text/css" href="//fonts.neworld.org/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.1"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.1"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Jenkins Pipeline</h1><a id="logo" href="/.">每天进步一点点……</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="Arama"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">Jenkins Pipeline</h1><div class="post-meta"><a href="/2018/03/22/Jenkins-Pipeline.html#comments" class="comment-count"></a><p><span class="date">Mar 22, 2018</span><span><a href="/categories/Jenkins/" class="category">Jenkins</a></span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>本文介绍如何在Jenkins中使用pipeline插件。</p>
+<p>Jenkins安装启动后，还需要安装一些插件才可以使用pipeline（流水线）的特性。你可以在系统管理–插件管理–可选插件中搜索Pipeline进行按钮；要提醒一下的是，Jenkins会自己查找依赖的插件，所以你可能看到安装的插件不只一个。Pipeline插件的wiki地址是<a href="https://wiki.jenkins.io/display/JENKINS/Pipeline+Plugin。另外，你可以通过这里https://plugins.jenkins.io/workflow-aggregator，查看该插件的依赖关系，并找到Pipeline插件在Github上的托管地址。" target="_blank" rel="noopener">https://wiki.jenkins.io/display/JENKINS/Pipeline+Plugin。另外，你可以通过这里https://plugins.jenkins.io/workflow-aggregator，查看该插件的依赖关系，并找到Pipeline插件在Github上的托管地址。</a></p>
+<h1 id="什么是Pipeline"><a href="#什么是Pipeline" class="headerlink" title="什么是Pipeline"></a>什么是Pipeline</h1><p>Jenkins Pipeline是一套插件，支持实现和持续集成作为流水线应用到Jenkins。Pipeline提供了一套可扩展的工具。</p>
+<p>Pipeline大致可以分为：节点、阶段、步骤。步骤是具体的功能表达式，例如：执行shell命令等。阶段，你可以理解为步骤的集合。而节点则是包含阶段，它规定了这些阶段（步骤）都会在哪些slave上运行。</p>
+<p>节点，可以是一个普通的slave，也可以运行在Docker容器中。</p>
+<h1 id="为什么要用Pipeline"><a href="#为什么要用Pipeline" class="headerlink" title="为什么要用Pipeline"></a>为什么要用Pipeline</h1><p>根本上来说，Jenkins是一个支持很多自动化模式的引擎。Pipeline增加了一套强大的工具到Jenkins中，支持用户从简单持续集成到全面的持续集成。通过模块化一些列相关的任务，用户可以利用很多Pipeline的特性。</p>
+<p><strong>代码：</strong>Pipelines通过代码来实现，并通常可以由版本控制系统（svn、git等）来管理。</p>
+<p><strong>可暂停：</strong>Pipelines可以暂停（停止），并且可以在运行之前接收人工输入或者等待同意。</p>
+<h1 id="Pipeline表达式"><a href="#Pipeline表达式" class="headerlink" title="Pipeline表达式"></a>Pipeline表达式</h1><h2 id="Step"><a href="#Step" class="headerlink" title="Step"></a>Step</h2><p>是一个单一任务，告诉Jenkins该做什么。例如，在step中执行shell命令make。当一个插件扩展了Pipeline DSL，就意味着可以使用新的step。</p>
+<h2 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h2><p>大多数工作是在一个或者多个节点（node）中完成的。</p>
+<h1 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h1><p>Jenkins的流水线（pipeline）采用groovy语法来编写。逻辑判断、循环、异常等功能都是具备的，另外，熟悉groovy的人就明白这和Java的写法有一定的相似。</p>
+<p>下面我介绍一些流水线的步骤（或者函数），首先介绍的是在插件workflow-basic-steps-plugin中的。我们从插件的名称上也能看到，这些流水线步骤大多是基础、简单的。首先，给出我研究时的版本信息：</p>
+<pre><code>&lt;groupId&gt;org.jenkins-ci.plugins.workflow&lt;/groupId&gt;`
+&lt;artifactId&gt;workflow-basic-steps&lt;/artifactId&gt;
+&lt;version&gt;2.7-SNAPSHOT&lt;/version&gt;
+</code></pre><p>以便各位依据本文可以进一步学习Jenkins流水线插件的源码。</p>
+<h2 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h2><pre><code>node {
+    echo env.JENKINS_HOME
+    sh &apos;echo $JENKINS_HOME&apos;
+
+    echo env.JOB_NAME
+    echo env.NODE_NAME
+    echo env.NODE_LABELS
+    echo env.WORKSPACE
+    echo env.JENKINS_URL
+    echo env.BUILD_URL
+
+    env.SUREN_VER = &apos;12&apos;
+    echo env.SUREN_VER
+}
+</code></pre><p>上面的示例中，给出了如何使用内置的环境变量和自定义环境变量的做法</p>
+<pre><code>node() {
+    env.JDK_HOME = &quot;${tool &apos;8u131&apos;}&quot;
+    env.PATH=&quot;${env.JDK_HOME}/bin:${env.PATH}&quot;
+
+    echo env.JDK_HOME
+    echo env.PATH
+    sh &apos;java -version&apos;
+}
+
+node(&apos;bimpm_deploytodev&apos;) {
+    def pass_bin = &apos;/opt/pass/bin&apos;
+    env.PASS_BIN = pass_bin
+
+    stage(&apos;Clean&apos;) {
+        sh &apos;rm -rfv $PASS_BIN&apos;
+    }
+}
+</code></pre><h2 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h2><pre><code>node() {
+    tool name: &apos;JDK8_Linux&apos;, type: &apos;jdk&apos;
+    tool name: &apos;maven339_linux_dir&apos;, type: &apos;maven&apos;
+    echo &apos;hello&apos;
+}
+</code></pre><p>上面的pipeline指定需要工具jdk和maven的名称（在Global Tool Configuration中配置）。</p>
+<p>对应的实现类为ToolStep，该类被final关键字所修饰，因此是不能做扩展的了。</p>
+<h2 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h2><pre><code>node {
+    echo &apos;hello&apos;
+}
+
+properties([
+    buildDiscarder(
+        logRotator(
+            artifactDaysToKeepStr: &apos;&apos;,
+            artifactNumToKeepStr: &apos;&apos;,
+            daysToKeepStr: &apos;5&apos;,
+            numToKeepStr: &apos;10&apos;
+        )
+    ),
+    pipelineTriggers([
+      cron(&apos;H 3,12,17 * * *&apos;)
+    ])
+])
+</code></pre><h2 id="拷贝成品"><a href="#拷贝成品" class="headerlink" title="拷贝成品"></a>拷贝成品</h2><pre><code>node {
+       stage(&apos;Copy&apos;) {
+       step([$class: &apos;CopyArtifact&apos;, fingerprintArtifacts: true, flatten: true, projectName: &apos;BIM_PMJF/BIM-PMJF-BUILD/BIM_PMJF_DISCOVERY&apos;, selector: [$class: &apos;StatusBuildSelector&apos;, stable: false], target: &apos;/opt/pass/bin&apos;])
+   }
+}
+</code></pre><p>我们通常会在一个Job里实现工程构建，在另外的Job里做程序的部署，这时候就可以用到Jenkins的成品特性。它可以实现在多个slave之间拷贝成品。实现类为ArtifactArchiverStep。</p>
+<h2 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h2><pre><code>node(&apos;suren&apos;) {
+    def dev_path = &apos;/opt/suren/bin&apos;
+    def services = [
+        [
+            &apos;name&apos;: &apos;admin&apos;,
+            &apos;project&apos;: &apos;admin&apos;,
+            &apos;port&apos;: &apos;7002&apos;,
+            &apos;jarName&apos;: &apos;admin&apos;
+        ]
+    ];
+
+    stage(&apos;Copy Artifact&apos;) {
+        for(service in services){
+            step([$class: &apos;CopyArtifact&apos;, fingerprintArtifacts: true, flatten: true,
+                projectName: service.project,
+                selector: [$class: &apos;StatusBuildSelector&apos;, stable: false],
+                target: dev_path + &apos;/&apos; + service.name
+            ])
+        }
+    }
+
+    stage(&apos;Stop Service&apos;) {
+        for(service in services){
+           sh &apos;fuser -n tcp -k &apos; + service.port + &apos; &gt; redirection &amp;&apos;
+        }
+    }
+
+    stage(&apos;Start Service&apos;) {
+        for(service in services){
+            sh &apos;cd &apos; + pass_bin + &apos;/&apos; + service.name + &apos; &amp;&amp; nohup nice java -server -Xms128m -Xmx384m \
+                -jar &apos; + service.jarName + &apos;.jar \
+                --server.port=&apos; + service.port + &apos; $&gt; initServer.log 2&gt;&amp;1 &amp;&apos;
+        }
+    }
+}
+</code></pre><p>上面的例子，展示了如何在jenkins pipeline中调用循环语句，实现批量操作。</p>
+<h2 id="参数化构建"><a href="#参数化构建" class="headerlink" title="参数化构建"></a>参数化构建</h2><pre><code>properties([[$class: &apos;JobRestrictionProperty&apos;],
+    parameters([run(description: &apos;&apos;,
+        filter: &apos;ALL&apos;, 
+        name: &apos;Name&apos;, 
+        projectName: &apos;Project&apos;)]),
+    pipelineTriggers([])]
+)
+</code></pre><p>为了能让我们的流水线定义更加具有通用性，除了可以在流水线中使用系统预定义的变量外，可以使用由用户动态输入的变量值。当流水线Job加入参数化后，在执行任务时候就必须有用户输入一系列值才可以执行。</p>
+<h2 id="并行"><a href="#并行" class="headerlink" title="并行"></a>并行</h2><pre><code>node {
+    stage(&apos;Start Service&apos;) {
+        parallel &apos;test&apos;: {
+            echo &apos;test&apos;
+        }, &apos;deply&apos;: {
+            echo &apos;deply&apos;
+        }
+    }
+
+    parallel &apos;one&apos; : {
+        stage(&apos;one&apos;) {
+            echo &apos;one&apos;
+        }
+    }, &apos;two&apos; : {
+        stage(&apos;two&apos;) {
+            echo &apos;two&apos;
+        }
+    }
+}
+
+parallel &apos;one&apos;: {
+    node{
+        stage(&apos;one&apos;) {
+            echo &apos;one&apos;
+        }
+    }
+}, &apos;two&apos;: {
+    node {
+        stage(&apos;two&apos;) {
+            echo &apos;two&apos;
+        }
+    }
+}
+</code></pre><p>Jenkins的流水线同时支持节点（node）、阶段（stage）和步骤（step）之间的并行执行。如果多个节点并发执行的话，并发数量会少于当前可用的执行器（exector）数量。</p>
+<h2 id="超时"><a href="#超时" class="headerlink" title="超时"></a>超时</h2><pre><code>node {
+    stage(&apos;stage2&apos;) {
+        timeout(time: 600, unit: &apos;SECONDS&apos;) {
+            sleep 20
+            echo &apos;2&apos;
+        }
+    }
+}
+</code></pre><p>遇到可能执行时间会比较长的情况，可以通过超时来约定最长的执行时间。</p>
+<p>对应的实现类为TimeoutStep。</p>
+<p>下面介绍的函数在插件workflow-durable-task-step-plugin中，版本信息如下：</p>
+<pre><code>&lt;groupId&gt;org.jenkins-ci.plugins.workflow&lt;/groupId&gt;
+&lt;artifactId&gt;workflow-durable-task-step&lt;/artifactId&gt;
+&lt;version&gt;2.18-SNAPSHOT&lt;/version&gt;
+</code></pre><h2 id="工作空间"><a href="#工作空间" class="headerlink" title="工作空间"></a>工作空间</h2><p>当你希望在一个流水线中，对多个工程（例如git工程）做构建以及部署等操作，如果不切换工作空间的话就会发生代码错乱的问题。你可以参考下面的示例代码来解决这个问题：</p>
+<pre><code>node{
+    stage(&apos;suren&apos;){
+        ws(&apos;suren-a-work&apos;) {
+            pwd
+        }
+
+        ws(&apos;suren-b-work&apos;) {
+            pwd
+        }
+    }
+}
+</code></pre><p>实现类为WorkspaceStep，使用final修饰，无法扩展。</p>
+<h2 id="执行节点"><a href="#执行节点" class="headerlink" title="执行节点"></a>执行节点</h2><p>Jenkins里可能会配置很多节点（node），而不一定所有的节点都满足你的构建环境要求，这时候就需要来指定节点了：</p>
+<pre><code>node(&apos;local&apos;) {
+    echo &apos;hello&apos;
+}
+
+properties([
+    buildDiscarder(
+        logRotator(
+            artifactDaysToKeepStr: &apos;&apos;,
+            artifactNumToKeepStr: &apos;&apos;,
+            daysToKeepStr: &apos;5&apos;,
+            numToKeepStr: &apos;10&apos;
+        )
+    ),
+    pipelineTriggers([
+      cron(&apos;H 3,12,17 * * *&apos;)
+    ])
+])
+</code></pre><p>上面的pipeline指定了运行节点的label为local。</p>
+<p>实现类为ExecutorStep，使用final修饰，无法扩展。</p>
+<h2 id="异常捕获"><a href="#异常捕获" class="headerlink" title="异常捕获"></a>异常捕获</h2><pre><code>node{
+    stage(&apos;suren&apos;){
+        try{
+            trigger
+        }catch(error){
+            echo error.getMessage()
+        }
+    }
+}
+</code></pre><p>这里调用了一个不存在的流水线函数，然后使用catch来捕获并打印错误信息。</p>
+<h2 id="stash"><a href="#stash" class="headerlink" title="stash"></a>stash</h2><pre><code>node {
+    stash(name: &apos;test&apos;, includes: &apos;*.xml&apos;, allowEmpty: true)
+}
+
+node(&apos;jenkins-slave&apos;) {
+    unstash(name: &apos;test&apos;)
+}
+</code></pre><p>pipeline的文件存储（stash）这个功能，可以在流水线需要运行在多个节点（node）的情况下使用。stash和unstash会把存储的文件从一个节点转移到另一个节点上。上面给出的例子中，把所有的xml文件从master转移到了当前执行任务的slaver节点上。</p>
+<pre><code>node(&apos;jenkins-slave&apos;){
+    checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: &apos;https://github.com/LinuxSuRen/autotest.parent&apos;]]])
+}
+
+node {
+    def path = JENKINS_HOME + &apos;/jobs/&apos; + JOB_NAME + &apos;/builds/&apos; + BUILD_ID
+    echo path
+    dir(path){
+        stash(name: &apos;test&apos;, includes: &apos;*.xml&apos;, allowEmpty: true)
+    }
+}
+
+node(&apos;jenkins-slave&apos;) {
+    unstash(name: &apos;test&apos;)
+}
+</code></pre><h2 id="敏感信息"><a href="#敏感信息" class="headerlink" title="敏感信息"></a>敏感信息</h2><p>我们可以利用Jenkins的Credentials机制，在Pipeline中传递密码等敏感信息，例如：</p>
+<pre><code>pipeline {
+    agent any
+
+    stages{
+        stage(&apos;test&apos;) {
+            steps{
+                withCredentials([usernamePassword(credentialsId: &apos;aaa&apos;, passwordVariable: &apos;passwd&apos;, usernameVariable: &apos;user&apos;)]) {
+                    sh &apos;&apos;&apos;echo $user $passwd&apos;&apos;&apos;
+                }
+            }
+        }
+    }
+}
+</code></pre><h2 id="文件读取"><a href="#文件读取" class="headerlink" title="文件读取"></a>文件读取</h2><p>很多情况下，我们需要读取文件内容。</p>
+<p>获取pom.xml版本号，获取groupId（需要的插件Pipeline Utility Steps）：</p>
+<pre><code>node {
+    stage(&apos;test&apos;){
+        checkout([$class: &apos;GitSCM&apos;, branches: [[name: &apos;*/master&apos;]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: &apos;https://github.com/LinuxSuRen/autotest.parent&apos;]]])
+
+        pom = readMavenPom file: &apos;pom.xml&apos;
+        echo pom.version
+        echo pom.groupId
+        echo pom.artifactId
+    }
+}
+</code></pre><h2 id="使用Docker"><a href="#使用Docker" class="headerlink" title="使用Docker"></a>使用Docker</h2><p>在docker容器中执行任务：</p>
+<pre><code>pipeline {
+    agent {
+        docker {
+            image &apos;eclipse/mysql&apos;
+            args &apos;-e MYSQL_ROOT_PASSWORD=root&apos;
+        } 
+    }
+
+    stages {
+        stage(&apos;test&apos;) {
+            steps {
+                sh &apos;mysql&apos;
+            }
+        }
+    }
+}
+</code></pre><p>withDockerContainer</p>
+<p>withDockerServer</p>
+<p>dockerFingerprintRun</p>
+<p>withDockerRegistry</p>
+<p>dockerFingerprintFrom</p>
+<h1 id="其他插件"><a href="#其他插件" class="headerlink" title="其他插件"></a>其他插件</h1><p>另外有一些比较好的Jenkins流水线插件，给出推荐：</p>
+<p>支持从SCM加载库文件 <a href="https://github.com/suren-jenkins/workflow-remote-loader-plugin" target="_blank" rel="noopener">https://github.com/suren-jenkins/workflow-remote-loader-plugin</a></p>
+<h1 id="远程调试"><a href="#远程调试" class="headerlink" title="远程调试"></a>远程调试</h1><p>安装环境：</p>
+<p>sudo apt-get install -y npm</p>
+<p>jenkins-pipeline –file test.groovy –url <a href="http://localhost:8080/jenkins/job/MyJob" target="_blank" rel="noopener">http://localhost:8080/jenkins/job/MyJob</a> –credentials admin:123456</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://github.com/spring-cloud/spring-cloud-pipelines" target="_blank" rel="noopener">https://github.com/spring-cloud/spring-cloud-pipelines</a></p>
+</div><div class="tags"><a href="/tags/Pipeline/">Pipeline</a></div><div class="post-share"><div class="bdsharebuttonbox"><span style="float:left;line-height: 28px;height: 28px;font-size:16px;font-weight:blod">分享到：</span><a href="#" data-cmd="more" class="bds_more"></a><a href="#" data-cmd="mshare" title="分享到一键分享" class="bds_mshare"></a><a href="#" data-cmd="fbook" title="分享到Facebook" class="bds_fbook"></a><a href="#" data-cmd="twi" title="分享到Twitter" class="bds_twi"></a><a href="#" data-cmd="linkedin" title="分享到linkedin" class="bds_linkedin"></a><a href="#" data-cmd="youdao" title="分享到有道云笔记" class="bds_youdao"></a><a href="#" data-cmd="evernotecn" title="分享到印象笔记" class="bds_evernotecn"></a><a href="#" data-cmd="weixin" title="分享到微信" class="bds_weixin"></a><a href="#" data-cmd="qzone" title="分享到QQ空间" class="bds_qzone"></a><a href="#" data-cmd="tsina" title="分享到新浪微博" class="bds_tsina"></a></div></div><div class="post-nav"><a href="/2018/03/21/Preliminary-Jenkins-X.html" class="next">初探Jenkins X</a></div><div id="comments"></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#介绍"><span class="toc-text">介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是Pipeline"><span class="toc-text">什么是Pipeline</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#为什么要用Pipeline"><span class="toc-text">为什么要用Pipeline</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pipeline表达式"><span class="toc-text">Pipeline表达式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Step"><span class="toc-text">Step</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Node"><span class="toc-text">Node</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#语法"><span class="toc-text">语法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#环境变量"><span class="toc-text">环境变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#工具"><span class="toc-text">工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#属性"><span class="toc-text">属性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#拷贝成品"><span class="toc-text">拷贝成品</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#循环"><span class="toc-text">循环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参数化构建"><span class="toc-text">参数化构建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#并行"><span class="toc-text">并行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#超时"><span class="toc-text">超时</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#工作空间"><span class="toc-text">工作空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#执行节点"><span class="toc-text">执行节点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#异常捕获"><span class="toc-text">异常捕获</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#stash"><span class="toc-text">stash</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#敏感信息"><span class="toc-text">敏感信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件读取"><span class="toc-text">文件读取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用Docker"><span class="toc-text">使用Docker</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#其他插件"><span class="toc-text">其他插件</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#远程调试"><span class="toc-text">远程调试</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-text">参考</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/03/22/Jenkins-Pipeline.html">Jenkins Pipeline</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/21/Preliminary-Jenkins-X.html">初探Jenkins X</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/19/spring-cloud-start-to-give-up.html">浅谈服务治理、微服务与Service Mesh（二） Spring Cloud从入门到精通到放弃【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/19/dubbo-past-and-present.html">浅谈服务治理、微服务与Service Mesh（一）Dubbo的前世今生【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/18/choosing-a-linux-tracer.html">如何选择 Linux 上的跟踪器</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-gui"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Jenkins/">Jenkins</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/微服务/">微服务</a><span class="category-list-count">2</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/Pipeline/" style="font-size: 15px;">Pipeline</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Spring-Cloud/" style="font-size: 15px;">Spring Cloud</a> <a href="/tags/Dubbo-Service-Mesh-微服务-ZooKeeper/" style="font-size: 15px;">Dubbo,Service Mesh,微服务,ZooKeeper</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a></li></ul></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">Baidu Site Haritası</a> |  <a href="/atom.xml">订阅</a> |  <a href="/about/">关于</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次</p><p><span> Copyright &copy;<a href="/." rel="nofollow">Cloudpanl.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?8c06a0cc670571138e4a33bce0d3167a";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+  })();
+</script><script type="text/javascript" src="/js/search.json.js?v=2.0.1"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.1" async></script><script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":["mshare","weixin","tsina","qzone","linkedin","fbook","twi","print","renren","sqq","evernotecn","bdysc","tqq","tqf","bdxc","kaixin001","tieba","douban","bdhome","thx","ibaidu","meilishuo","mogujie","diandian","huaban","duitang","hx","fx","youdao","sdo","qingbiji","people","xinhua","mail","isohu","yaolan","wealink","ty","iguba","h163","copy"],"bdPic":"","bdStyle":"1","bdSize":"16"},"share":{},"image":{"viewList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"],"viewText":"分享到：","viewSize":"16"},"selectShare":{"bdContainerClass":null,"bdSelectMiniList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"]}};with(document)0[(getElementsByTagName('head')[0]||head).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script></body></html>
