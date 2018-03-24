@@ -1,0 +1,230 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="panliang's blog."><meta name="keywords" content="Linux,Kubernetes,Docker,Microservices"><title>Kubernetes中的亲和性【转载】 | 每天进步一点点……</title><link rel="stylesheet" type="text/css" href="//fonts.neworld.org/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.1"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.1"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Kubernetes中的亲和性【转载】</h1><a id="logo" href="/.">每天进步一点点……</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="Arama"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">Kubernetes中的亲和性【转载】</h1><div class="post-meta"><a href="/2018/03/24/Affinity-in-Kubernetes.html#comments" class="comment-count"></a><p><span class="date">Mar 24, 2018</span><span><a href="/categories/Kubernetes/" class="category">Kubernetes</a></span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><p>现实中应用的运行对于kubernetes在亲和性上提出了一些要求，可以归类到以下几个方面： </p>
+<ol>
+<li>Pod固定调度到某些节点之上 </li>
+<li>Pod不会调度到某些节点之上 </li>
+<li>Pod的多副本调度到相同的节点之上 </li>
+<li>Pod的多副本调度到不同的节点之上</li>
+</ol>
+<h1 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h1><p>下面我们将通过例子的方式来说明在kubernetes需要去设置亲和性实现上面要求．</p>
+<h2 id="Pod调动到某些节点上"><a href="#Pod调动到某些节点上" class="headerlink" title="Pod调动到某些节点上"></a>Pod调动到某些节点上</h2><p>Pod的定义中通过nodeSelector指定label标签，pod将会只调度到具有该标签的node之上</p>
+<pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
+  nodeSelector:
+    disktype: ssd
+</code></pre><p>这个例子中pod只会调度到具有disktype=ssd的node上面．</p>
+<h2 id="节点亲和性-反亲和性"><a href="#节点亲和性-反亲和性" class="headerlink" title="节点亲和性/反亲和性"></a>节点亲和性/反亲和性</h2><p>Affinity/anti-affinity node 相对于nodeSelector机制更加的灵活和丰富</p>
+<ul>
+<li>表达的语法：支持In,NotIn,Exists,DoesNotExist,Gt,Lt．</li>
+<li>支持soft(preference)和hard(requirement),hard表示pod sheduler到某个node上，则必须满足亲和性设置．soft表示scheduler的时候，无法满足节点的时候，会选择非nodeSelector匹配的节点．</li>
+<li><p>nodeAffinity的基础上添加多个nodeSelectorTerms字段，调度的时候Node只需要nodeSelectorTerms中的某一个符合条件就符合nodeAffinity的规则．在nodeSelectorTerms中添加matchExpressions，需要可以调度的Node是满足matchExpressions中表示的所有规则．</p>
+<pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: with-node-affinity
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/e2e-az-name
+            operator: In
+            values:
+            - e2e-az1
+            - e2e-az2
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: another-node-label-key
+            operator: In
+            values:
+            - another-node-label-value
+  containers:
+  - name: with-node-affinity
+    image: k8s.gcr.io/pause:2.0
+</code></pre></li>
+</ul>
+<h2 id="Pod间的亲和性和反亲和性"><a href="#Pod间的亲和性和反亲和性" class="headerlink" title="Pod间的亲和性和反亲和性"></a>Pod间的亲和性和反亲和性</h2><p>基于已经运行在Node 上pod的labels来决定需要新创建的Pods是否可以调度到node节点上，配置的时候可以指定那个namespace中的pod需要满足pod的亲和性．可以通过<code>topologyKey</code>来指定topology domain, 可以指定为node／cloud provider zone／cloud provider region的范围．　</p>
+<ul>
+<li>表达的语法：支持In, NotIn, Exists, DoesNotExist</li>
+<li>Pod的亲和性和反亲和性可以分成<ol>
+<li>requiredDuringSchedulingIgnoredDuringExecution　#硬要求 </li>
+<li>preferredDuringSchedulingIgnoredDuringExecution　＃软要求 </li>
+</ol>
+</li>
+</ul>
+<p>类似上面node的亲和策略类似，<code>requiredDuringSchedulingIgnoredDuringExecution</code>亲和性可以用于约束不同服务的pod在同一个topology domain的Nod上．<code>preferredDuringSchedulingIgnoredDuringExecution</code>反亲和性可以将服务的pod分散到不同的topology domain的Node上．</p>
+<ul>
+<li>topologyKey可以设置成如下几种类型 <ol>
+<li>kubernetes.io/hostname　　＃Node</li>
+<li>failure-domain.beta.kubernetes.io/zone　＃Zone </li>
+<li>failure-domain.beta.kubernetes.io/region #Region </li>
+</ol>
+</li>
+</ul>
+<p>可以设置node上的label的值来表示node的name,zone,region等信息，pod的规则中指定topologykey的值表示指定topology范围内的node上运行的pod满足指定规则</p>
+<pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-affinity
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: security
+            operator: In
+            values:
+            - S1
+        topologyKey: failure-domain.beta.kubernetes.io/zone
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: security
+              operator: In
+              values:
+              - S2
+          topologyKey: kubernetes.io/hostname
+  containers:
+  - name: with-pod-affinity
+    image: k8s.gcr.io/pause:2.0
+</code></pre><p>利用社区官方的例子来进一步的说明，例子中指定了pod的亲和性和反亲和性，<br>preferredDuringSchedulingIgnoredDuringExecution指定的规则是pod将会调度到的node尽量会满足如下条件：</p>
+<p>node上具有failure-domain.beta.kubernetes.io/zone，并且具有相同failure-domain.beta.kubernetes.io/zone的值的node上运行有一个pod,它符合label为securtity=S1. preferredDuringSchedulingIgnoredDuringExecution规则表示将不会调度到node上运行有security=S2的pod．如果这里我们将topologyKey＝failure-domain.beta.kubernetes.io/zone，那么pod将不会调度到node满足的条件是：node上具有failure-domain.beta.kubernetes.io/zone相同的ｖalue,并且这些相同zone下的node上运行有security=S2的pod.</p>
+<p>Notice:对于topologyKey字段具有如下约束 </p>
+<ol>
+<li>对于亲和性以及RequiredDuringScheduling的反亲和性，topologyKey需要指定 </li>
+<li>对于RequiredDuringScheduling的反亲和性，LimitPodHardAntiAffinityTopology的准入控制限制topologyKey为kubernetes.io/hostname,可以通过修改或者disable解除该约束 </li>
+<li>对于PreferredDuringScheduling的反亲和性，空的topologyKey表示kubernetes.io/hostname, failure-domain.beta.kubernetes.io/zone and failure-domain.beta.kubernetes.io/region的组合． </li>
+<li>topologyKey在遵循其他约束的基础上可以设置成其他的key.</li>
+</ol>
+<p>规则中可以指定匹配pod所在namespace,如果定义了但是为空，它表示所有namespace范围内的pod.</p>
+<h1 id="常用的场景"><a href="#常用的场景" class="headerlink" title="常用的场景"></a>常用的场景</h1><p>一些更加常用的场景见例子所示 </p>
+<p>例子一</p>
+<pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-cache
+spec:
+  selector:
+    matchLabels:
+      app: store
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: store
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - store
+            topologyKey: &quot;kubernetes.io/hostname&quot;
+      containers:
+      - name: redis-server
+        image: redis:3.2-alpine
+</code></pre><p>创建了一个Deployment,副本数为３，指定了反亲和规则如上所示，pod的label为app:store,那么pod调度的时候将不会调度到node上已经运行了label为app:store的pod了，这样就会使得Deployment的三副本分别部署在不同的host的node上．</p>
+<p>例子二</p>
+<pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+spec:
+  selector:
+    matchLabels:
+      app: web-store
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: web-store
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - web-store
+            topologyKey: &quot;kubernetes.io/hostname&quot;
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - store
+            topologyKey: &quot;kubernetes.io/hostname&quot;
+      containers:
+      - name: web-app
+        image: nginx:1.12-alpine
+</code></pre><p>在一个例子中基础之上，要求pod的亲和性满足requiredDuringSchedulingIgnoredDuringExecution中topologyKey=”kubernetes.io/hostname”,并且node上需要运行有app=store的label. </p>
+<p>运行完例子一，例子二，那么pod的分布如下所示</p>
+<pre><code>$kubectl get pods -o wide
+NAME                           READY STATUS    RESTARTS   AGE     IP           NODE
+redis-cache-1450370735-6dzlj   1/1   Running   0          8m      10.192.4.2   kube-node-3
+redis-cache-1450370735-j2j96   1/1   Running   0          8m      10.192.2.2   kube-node-1
+redis-cache-1450370735-z73mh   1/1   Running   0          8m      10.192.3.1   kube-node-2
+web-server-1287567482-5d4dz    1/1   Running   0          7m      10.192.2.3   kube-node-1
+web-server-1287567482-6f7v5    1/1   Running   0          7m      10.192.4.3   kube-node-3
+web-server-1287567482-s330j    1/1   Running   0          7m      10.192.3.2   kube-node-2
+</code></pre><p>例子三</p>
+<pre><code>apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
+kind: Deployment
+metadata:
+  name: web-server
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: web-store
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - web-store
+            topologyKey: &quot;kubernetes.io/hostname&quot;
+      containers:
+      - name: web-app
+        image: hub.easystack.io/library/nginx:1.9.0
+</code></pre><p>在一些应用中，pod副本之间需要共享cache,需要将pod运行在一个节点之上</p>
+<pre><code>web-server-77bfb4575f-bhxvg            1/1       Running   0          11s       10.233.66.79     hzc-slave2   app=web-store,pod-template-hash=3369601319
+web-server-77bfb4575f-mkfd9            1/1       Running   0          11s       10.233.66.80     hzc-slave2   app=web-store,pod-template-hash=3369601319
+web-server-77bfb4575f-wgjq6            1/1       Running   0          11s       10.233.66.78     hzc-slave2   app=web-store,pod-template-hash=3369601319
+</code></pre><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://github.com/davidkbainbridge/demo-affinity" target="_blank" rel="noopener">https://github.com/davidkbainbridge/demo-affinity</a><br><a href="https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#inter-pod-affinity-and-anti-affinity-beta-feature" target="_blank" rel="noopener">https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#inter-pod-affinity-and-anti-affinity-beta-feature</a><br><a href="https://medium.com/kokster/scheduling-in-kubernetes-part-2-pod-affinity-c2b217312ae1" target="_blank" rel="noopener">https://medium.com/kokster/scheduling-in-kubernetes-part-2-pod-affinity-c2b217312ae1</a></p>
+</div><div class="tags"><a href="/tags/Kubernetes-亲和性/">Kubernetes 亲和性</a></div><div class="post-share"><div class="bdsharebuttonbox"><span style="float:left;line-height: 28px;height: 28px;font-size:16px;font-weight:blod">分享到：</span><a href="#" data-cmd="more" class="bds_more"></a><a href="#" data-cmd="mshare" title="分享到一键分享" class="bds_mshare"></a><a href="#" data-cmd="fbook" title="分享到Facebook" class="bds_fbook"></a><a href="#" data-cmd="twi" title="分享到Twitter" class="bds_twi"></a><a href="#" data-cmd="linkedin" title="分享到linkedin" class="bds_linkedin"></a><a href="#" data-cmd="youdao" title="分享到有道云笔记" class="bds_youdao"></a><a href="#" data-cmd="evernotecn" title="分享到印象笔记" class="bds_evernotecn"></a><a href="#" data-cmd="weixin" title="分享到微信" class="bds_weixin"></a><a href="#" data-cmd="qzone" title="分享到QQ空间" class="bds_qzone"></a><a href="#" data-cmd="tsina" title="分享到新浪微博" class="bds_tsina"></a></div></div><div class="post-nav"><a href="/2018/03/23/Pipeline-syntax.html" class="next">Pipeline语法</a></div><div id="comments"></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#实践"><span class="toc-text">实践</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Pod调动到某些节点上"><span class="toc-text">Pod调动到某些节点上</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#节点亲和性-反亲和性"><span class="toc-text">节点亲和性/反亲和性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pod间的亲和性和反亲和性"><span class="toc-text">Pod间的亲和性和反亲和性</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#常用的场景"><span class="toc-text">常用的场景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-text">参考</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/03/24/Affinity-in-Kubernetes.html">Kubernetes中的亲和性【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/23/Pipeline-syntax.html">Pipeline语法</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/22/Jenkins-Pipeline.html">Jenkins Pipeline</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/21/Preliminary-Jenkins-X.html">初探Jenkins X</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/19/spring-cloud-start-to-give-up.html">浅谈服务治理、微服务与Service Mesh（二） Spring Cloud从入门到精通到放弃【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/19/dubbo-past-and-present.html">浅谈服务治理、微服务与Service Mesh（一）Dubbo的前世今生【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/18/choosing-a-linux-tracer.html">如何选择 Linux 上的跟踪器</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-gui"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Jenkins/">Jenkins</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kubernetes/">Kubernetes</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/微服务/">微服务</a><span class="category-list-count">2</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/Kubernetes-亲和性/" style="font-size: 15px;">Kubernetes 亲和性</a> <a href="/tags/Pipeline/" style="font-size: 15px;">Pipeline</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Dubbo-Service-Mesh-微服务-ZooKeeper/" style="font-size: 15px;">Dubbo,Service Mesh,微服务,ZooKeeper</a> <a href="/tags/Spring-Cloud/" style="font-size: 15px;">Spring Cloud</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a></li></ul></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">Baidu Site Haritası</a> |  <a href="/atom.xml">订阅</a> |  <a href="/about/">关于</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次</p><p><span> Copyright &copy;<a href="/." rel="nofollow">Cloudpanl.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?8c06a0cc670571138e4a33bce0d3167a";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+  })();
+</script><script type="text/javascript" src="/js/search.json.js?v=2.0.1"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.1" async></script><script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":["mshare","weixin","tsina","qzone","linkedin","fbook","twi","print","renren","sqq","evernotecn","bdysc","tqq","tqf","bdxc","kaixin001","tieba","douban","bdhome","thx","ibaidu","meilishuo","mogujie","diandian","huaban","duitang","hx","fx","youdao","sdo","qingbiji","people","xinhua","mail","isohu","yaolan","wealink","ty","iguba","h163","copy"],"bdPic":"","bdStyle":"1","bdSize":"16"},"share":{},"image":{"viewList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"],"viewText":"分享到：","viewSize":"16"},"selectShare":{"bdContainerClass":null,"bdSelectMiniList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"]}};with(document)0[(getElementsByTagName('head')[0]||head).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script></body></html>

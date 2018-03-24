@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2018/03/24/Affinity-in-Kubernetes.html</loc>
+    
+    <lastmod>2018-03-24T03:10:46.381Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/03/23/Pipeline-syntax.html</loc>
     
     <lastmod>2018-03-23T10:16:46.194Z</lastmod>
