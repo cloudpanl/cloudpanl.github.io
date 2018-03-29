@@ -2,16 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/about/index.html</loc>
+    
+    <lastmod>2018-03-29T14:46:21.135Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/03/28/Service-deployment.html</loc>
     
-    <lastmod>2018-03-28T07:41:07.653Z</lastmod>
+    <lastmod>2018-03-29T10:03:26.078Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://yoursite.com/2018/03/28/Database-Service-Segmentation.html</loc>
     
-    <lastmod>2018-03-28T07:32:34.022Z</lastmod>
+    <lastmod>2018-03-29T08:34:41.001Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2018/03/26/Distributed-transaction-basics.html</loc>
+    
+    <lastmod>2018-03-28T14:15:16.719Z</lastmod>
     
   </url>
   
@@ -19,13 +33,6 @@
     <loc>http://yoursite.com/2018/03/28/Distributed-transaction-solutions.html</loc>
     
     <lastmod>2018-03-28T06:41:45.267Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2018/03/26/Distributed-transaction-basics.html</loc>
-    
-    <lastmod>2018-03-27T14:42:13.262Z</lastmod>
     
   </url>
   
@@ -82,13 +89,6 @@
     <loc>http://yoursite.com/2018/03/18/choosing-a-linux-tracer.html</loc>
     
     <lastmod>2018-03-18T15:28:12.985Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/about/index.html</loc>
-    
-    <lastmod>2018-03-18T10:39:46.243Z</lastmod>
     
   </url>
   
