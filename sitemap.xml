@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-3.html</loc>
+    
+    <lastmod>2018-03-31T04:19:46.627Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-2.html</loc>
+    
+    <lastmod>2018-03-31T04:08:40.853Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-1.html</loc>
     
     <lastmod>2018-03-31T03:44:29.943Z</lastmod>

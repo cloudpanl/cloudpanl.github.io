@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-03-31T03:44:29.943Z</updated>
+  <updated>2018-03-31T04:19:46.627Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,56 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用Istio简化微服务系列三：如何才能做“金丝雀部署”，并通过Istio增加流量？【转载】</title>
+    <link href="http://yoursite.com/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-3.html"/>
+    <id>http://yoursite.com/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-3.html</id>
+    <published>2018-03-31T04:06:27.000Z</published>
+    <updated>2018-03-31T04:19:46.627Z</updated>
+    
+    <content type="html"><![CDATA[<p>本系列的第二部分中（<a href="https://cloudpanl.github.io/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-2.html" target="_blank" rel="noopener">使用Istio简化微服务系列二：如何通过HTTPS与外部服务进行通信？</a>），我们学会了使用 Istio egress rules 来控制服务网格之外的服务的访问。</p><p>在这一部分中，我们将看到如何才能做“金丝雀部署”（Canary Deployments），并通过 Istio 增加流量。</p><h1 id="背景："><a href="#背景：" class="headerlink" title="背景："></a>背景：</h1><p>在过去的文章中，我详细解释了我们如何使用 Kubernetes 进行蓝/绿部署。这是一种部署技术，在此技术中，我们部署了与应用程序当前版本和新版本相同的生产环境。这项技术使我们能够执行零停机时间部署（Zero Downtime Deployments， 简称：ZDD），以确保我们的用户在切换到新版本时不受影响。有了这两个版本（当前版本和新版本）也使我们能够在新版本出现任何问题时进行回滚。</p><p>我们还需要的是能够将流量增加(或下降)到我们的应用程序的新版本，并监控它以确保没有负面影响。实现这一点的一种方法是使用“金丝雀部署”或“金丝雀”发行版。</p><p>一个不太有趣的事实：当矿工们带着金丝雀进入矿场时，任何有毒气体都会首先杀死金丝雀，并以此警告矿工们离开矿井。</p><p>同样地，在应用程序部署世界中，使用“金丝雀部署”，我们可以将应用程序的新版本部署到生产中，并只向这个新部署发送一小部分流量。这个新版本将与当前版本并行运行，并在我们将所有流量切换到新版本之前提醒我们注意任何问题。</p><p>例如：我们应用程序的 v1 可以占到90%的流量，而 v2 可以得到另外的10%。如果一切看起来都很好，我们可以将 v2 流量增加到25%，50%，最终达到100%。Istio Canary 部署的另一个优势是，我们可以根据请求中的自定义标头来增加流量。例如，在我们的应用程序的v2中设置了一个特定 cookie 头值的流量的10%。</p><p>注意：虽然“金丝雀部署”“可以”与 A/B 测试一起使用，以查看用户如何从业务度量的角度对新版本做出反应，但其背后的真正动机是确保应用程序从功能角度上满意地执行。此外，企业所有者可能希望在更长的时间内(例如:许多天甚至几周)进行 A/B 测试，而不是金丝雀码头可能采取的措施。因此，把它们分开是明智的。</p><h1 id="Let’s-see-it-in-action"><a href="#Let’s-see-it-in-action" class="headerlink" title="Let’s see it in action"></a>Let’s see it in action</h1><p>从第一部分我们知道，我们的 PetService 与 PetDetailsService(v1) 和 PetMedicalHistoryService(v1) 进行了会谈。对 PetService的调用的输出如下:</p><pre><code>$ curl http://108.59.82.93/pet/123{  &quot;petDetails&quot;: {    &quot;petName&quot;: &quot;Maximus&quot;,    &quot;petAge&quot;: 5,    &quot;petOwner&quot;: &quot;Nithin Mallya&quot;,    &quot;petBreed&quot;: &quot;Dog&quot;  },  &quot;petMedicalHistory&quot;: {    &quot;vaccinationList&quot;: [      &quot;Bordetella, Leptospirosis, Rabies, Lyme Disease&quot;    ]  }}</code></pre><p>在上面的回复中，你会注意到 petBreed 说“狗”。然而，Maximus 是德国牧羊犬，这时候我们需要修改 PetDetailsService，以便正确返回品种。</p><p>因此，我们创建了 PetDetailsService 的 v2，它将返回“德国牧羊犬”。但是，我们希望确保在将所有流量驱动到 v2 之前，我们可以使用一小部分用户来测试这个服务的 v2。</p><p>在下面的图1中，我们看到流量被配置成这样，50%的请求将被定向到 v1 和50%到 v2，我们的 “金丝雀部署”。(它可以是任意数字，取决于变化的大小，并尽量减少负面影响)。</p><p><img src="http://www.servicemesh.cn/uploads/article/20180327/631f3f69dafc4ce840f63c53f6c99f23.jpg" alt=""></p><h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>1、创建 PetDetails Service 的 v2 版本并像以前一样部署它。 （请参阅 petdetailservice / kube 文件夹下的 petinfo.yaml）</p><pre><code>$ kubectl get podsNAME                                                     READY     STATUS    RESTARTS      AGEpetdetailsservice-v1-2831216563-qnl10        2/2        Running      0                19hpetdetailsservice-v2-2943472296-nhdxt       2/2       Running       0              2hpetmedicalhistoryservice-v1-28468096-hd7ld   2/2       Running      0              19hpetservice-v1-1652684438-3l112                      2/2       Running      0             19h</code></pre><p>2、创建一个RouteRule，将流量分成 petdetailsservice 的50％（v1）和50％（v2），如下所示：</p><pre><code>cat &lt;&lt;EOF | istioctl create -f -apiVersion: config.istio.io/v1alpha2kind: RouteRulemetadata:  name: petdetailsservice-defaultspec:  destination:    name: petdetailsservice  route:  - labels:      version: v1    weight: 50  - labels:      version: v2    weight: 50EOF$ istioctl get routeruleNAME    KIND     NAMESPACEpetdetailsservice-default RouteRule.v1alpha2.config.istio.io default</code></pre><p>3、现在，如果你访问 PetService，你应该看到替代请求分别返回“Dog”和“German Shepherd Dog”，如下所示：</p><pre><code>$ curl http://108.59.82.93/pet/123{  &quot;petDetails&quot;: {    &quot;petName&quot;: &quot;Maximus&quot;,    &quot;petAge&quot;: 5,    &quot;petOwner&quot;: &quot;Nithin Mallya&quot;,    &quot;petBreed&quot;: &quot;Dog&quot;  },  &quot;petMedicalHistory&quot;: {    &quot;vaccinationList&quot;: [      &quot;Bordetella, Leptospirosis, Rabies, Lyme Disease&quot;    ]  }}$ curl http://108.59.82.93/pet/123{  &quot;petDetails&quot;: {    &quot;petName&quot;: &quot;Maximus&quot;,    &quot;petAge&quot;: 5,    &quot;petOwner&quot;: &quot;Nithin Mallya&quot;,    &quot;petBreed&quot;: &quot;German Shepherd Dog&quot;  },  &quot;petMedicalHistory&quot;: {    &quot;vaccinationList&quot;: [      &quot;Bordetella, Leptospirosis, Rabies, Lyme Disease&quot;    ]  }}</code></pre><p>It works！</p><p>这引出了一个问题：我们不能用 Kubernetes Canary Deployments 来做到这一点吗？简短的答案是肯定的。</p><p>然而，这样做的步骤更复杂，也有局限性:</p><ul><li>你仍然需要创建 PetDetailsService  (v1和v2)的两个部署，但是你需要手动限制在部署过程中 v2 副本的数量，以维护 v1:v2 比。例如:你可以使用10个副本部署 v1，并将v2 部署到2个副本，以获得10:2的负载平衡，等等。</li><li>由于所有的 pod 无论版本是否相同，Kubernetes 集群中的流量负载平衡仍然受到随机性的影响。</li><li>基于业务量的自动伸缩 pods 也是有问题的，因为我们需要单独的 autoscale 的2个部署，它可以根据每个服务的流量负载分配来做出不同的行为。</li><li>如果我们想根据某些标准（如 request headers）仅允许某些用户使用/限制流量，则Kubernetes Canary Deployments可能无法实现此目标。</li></ul><h1 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h1><p>你刚刚看到了创建一个“金丝雀部署”和增加 Istio 的流量是多么容易。</p><p>参考链接：</p><ol><li>DevOxx Istio presentation by Ray Tsang: <a href="https://www.youtube.com/watch?v=AGztKw580yQ&amp;t=231s" target="_blank" rel="noopener">https://www.youtube.com/watch?v=AGztKw580yQ&amp;t=231s</a></li><li>Github link to this example: <a href="https://github.com/nmallya/istiodemo" target="_blank" rel="noopener">https://github.com/nmallya/istiodemo</a></li></ol>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;本系列的第二部分中（&lt;a href=&quot;https://cloudpanl.github.io/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-2.html&quot; target=&quot;_blank&quot; rel=
+      
+    
+    </summary>
+    
+      <category term="微服务" scheme="http://yoursite.com/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"/>
+    
+    
+      <category term="Istio简化微服务系列" scheme="http://yoursite.com/tags/Istio%E7%AE%80%E5%8C%96%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%B3%BB%E5%88%97/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>使用Istio简化微服务系列二：如何通过HTTPS与外部服务进行通信？【转载】</title>
+    <link href="http://yoursite.com/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-2.html"/>
+    <id>http://yoursite.com/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-2.html</id>
+    <published>2018-03-31T03:50:47.000Z</published>
+    <updated>2018-03-31T04:08:40.853Z</updated>
+    
+    <content type="html"><![CDATA[<p>在本系列第一部分（<a href="https://cloudpanl.github.io/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-1.html" target="_blank" rel="noopener">使用Istio简化微服务系列一：如何用Isito解决Spring Cloud Netflix部署微服务</a>），我们展示了如何使用 Istio 简化微服务间的通信。</p><p>在这一部分中，我们将看到 Istio 服务网格中的服务是如何通过HTTPS与外部服务进行通信的。</p><p><img src="http://www.servicemesh.cn/uploads/article/20180315/a4b7e3dc0be2c3e6b7778f0b6d10c8db.jpeg" alt=""></p><p>在上面的图1，PetService（直接与 PetDetailsService 和 PetMedicalHistoryService 服务进行通信）现在将也会调用外部的服务，外部服务位于 <a href="https://thedogapi.co.uk，返回" target="_blank" rel="noopener">https://thedogapi.co.uk，返回</a> dog 图片的 url 地址。</p><p>Istio 服务网格与外部的服务通信展示在下面的图 2 所示。</p><ul><li>与往常一样，在服务网格内的服务通信通过HTTP协议代理</li><li>与使用 HTTPS 协议的外部服务通信，内部服务仍然是发送 HTTP 请求，HTTP 请求会被以边缘（sidecar）方式部署的代理所拦截，并作为 TLS 协议的发起方与外部的服务在加密通道上进行通信</li></ul><p><img src="http://www.servicemesh.cn/uploads/article/20180315/e54e8c6fa5e0c0dc2d43598eccbc2710.jpeg" alt=""></p><h1 id="Github-repo"><a href="#Github-repo" class="headerlink" title="Github repo"></a>Github repo</h1><p>(<a href="https://github.com/nmallya/istiodemo" target="_blank" rel="noopener">https://github.com/nmallya/istiodemo</a>)</p><p>petservice 代码如下所示：</p><p><img src="http://www.servicemesh.cn/uploads/article/20180315/ec25ef3a558a895d4624a0e640bf22db.png" alt=""></p><p>备注：展示我们如何调用 DogAPI https，地址<a href="http://api.thedogapi.co.uk:443/v2/dog.php" target="_blank" rel="noopener">http://api.thedogapi.co.uk:443/v2/dog.php</a></p><p>让我们看一下当运行以下命令时会发生什么？其中 108.59.82.93 为 入口（Ingress）IP 地址 （参见 第一部分）</p><blockquote><p>curl <a href="http://108.59.82.93/pet/123" target="_blank" rel="noopener">http://108.59.82.93/pet/123</a></p></blockquote><p>响应内容如下：</p><pre><code>{  &quot;petDetails&quot;: {    &quot;petName&quot;: &quot;Maximus&quot;,    &quot;petAge&quot;: 5,    &quot;petOwner&quot;: &quot;Nithin Mallya&quot;,    &quot;petBreed&quot;: &quot;Dog&quot;  },  &quot;petMedicalHistory&quot;: {    &quot;vaccinationList&quot;: [      &quot;Bordetella, Leptospirosis, Rabies, Lyme Disease&quot;    ]  },  &quot;dogAPIResponse&quot;: {    &quot;message&quot;: &quot;request to https://api.thedogapi.co.uk/v2/dog.php failed, reason: read ECONNRESET&quot;,    &quot;type&quot;: &quot;system&quot;,    &quot;errno&quot;: &quot;ECONNRESET&quot;,    &quot;code&quot;: &quot;ECONNRESET&quot;  }}</code></pre><p>你会注意到当 petservice 访问位于 <a href="https://api.thedogapi.co.uk" target="_blank" rel="noopener">https://api.thedogapi.co.uk</a> 的外部服务时，上述的响应内容中 dogAPIResponse（不是最原始的名字）部分有一个错误信息。</p><p>这是因为所有外部的流量（egress）在默认情况下被阻止。在前面的文章中解释过边车（sidecar）代理只允许集群内的通信。</p><p>备注：正如我在第一部分提及的那样，当我们想要管控服务与外部服务通信的方式和阻止任何未经授权的访问的时候，这个限制非常有用。</p><blockquote><p>医疗保健/金融系统可以特别利用此功能来保护 PHI / PII 数据不会被无意地甚至恶意地从内部服务中共享。</p></blockquote><p>为了启用出口（egress）流量，你需要创建如下所示的出口规则（egress rule）：</p><pre><code>cat &lt;&lt;EOF | istioctl create -f -apiVersion: config.istio.io/v1alpha2kind: EgressRulemetadata:  name: dogapi-egress-rulespec:  destination:    service: api.thedogapi.co.uk  ports:    - port: 443      protocol: httpsEOF</code></pre><p>为了检查该出口规则（egress rule）是否已被创建，你可以运行下面的命令，你应该看到出口规则（egress rule）<code>dogapi-egress-rule</code> 已经被创建。</p><pre><code>kubectl get egressruleNAME                 AGEdogapi-egress-rule   5m</code></pre><p>我们再次运行上面的 curl 命令：</p><pre><code>$ curl http://108.59.82.93/pet/123{  &quot;petDetails&quot;: {    &quot;petName&quot;: &quot;Maximus&quot;,    &quot;petAge&quot;: 5,    &quot;petOwner&quot;: &quot;Nithin Mallya&quot;,    &quot;petBreed&quot;: &quot;Dog&quot;  },  &quot;petMedicalHistory&quot;: {    &quot;vaccinationList&quot;: [      &quot;Bordetella, Leptospirosis, Rabies, Lyme Disease&quot;    ]  },  &quot;dogAPIResponse&quot;: {    &quot;count&quot;: 1,    &quot;api_version&quot;: &quot;v2&quot;,    &quot;error&quot;: null,    &quot;data&quot;: [      {        &quot;id&quot;: &quot;rCaz-LNuzCC&quot;,&quot;url&quot;: &quot;https://i.thedogapi.co.uk/rCaz-LNuzCC.jpg&quot;,        &quot;time&quot;: &quot;2017-08-30T21:43:03.0&quot;,        &quot;format&quot;: &quot;jpg&quot;,        &quot;verified&quot;: &quot;1&quot;,        &quot;checked&quot;: &quot;1&quot;      }    ],    &quot;response_code&quot;: 200  }}</code></pre><h1 id="结论："><a href="#结论：" class="headerlink" title="结论："></a>结论：</h1><p>我们看到如何通过创建明确规则，来启用从服务网格（service mesh ）到外部服务的通信。</p><p>在后续的文章中，我们将会看到如何实施其他重要的任务比如流量路由（traffic routing）和流量变化（ramping），使用断路器（circuit breaker）等。</p><p>参考链接：</p><ol><li>Istio 官方地址 <a href="https://istio.io/" target="_blank" rel="noopener">https://istio.io/</a></li><li>DevOxx 的RayTsang的Istio演讲材料: <a href="https://www.youtube.com/watch?v=AGztKw580yQ&amp;t=231s" target="_blank" rel="noopener">https://www.youtube.com/watch?v=AGztKw580yQ&amp;t=231s</a></li><li>案例的Github: <a href="https://github.com/nmallya/istiodemo" target="_blank" rel="noopener">https://github.com/nmallya/istiodemo</a></li><li>Kubernetes: <a href="https://kubernetes.io/" target="_blank" rel="noopener">https://kubernetes.io/</a></li><li>DogAPI 网址: <a href="https://thedogapi.co.uk/" target="_blank" rel="noopener">https://thedogapi.co.uk/</a></li></ol><p>原文链接：<a href="https://medium.com/google-cloud/simplifying-microservices-with-istio-in-google-kubernetes-engine-part-ii-7461b1833089" target="_blank" rel="noopener">https://medium.com/google-cloud/simplifying-microservices-with-istio-in-google-kubernetes-engine-part-ii-7461b1833089</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;在本系列第一部分（&lt;a href=&quot;https://cloudpanl.github.io/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-1.html&quot; target=&quot;_blank&quot; rel=&quot;
+      
+    
+    </summary>
+    
+      <category term="微服务" scheme="http://yoursite.com/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"/>
+    
+    
+      <category term="Istio简化微服务系列" scheme="http://yoursite.com/tags/Istio%E7%AE%80%E5%8C%96%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%B3%BB%E5%88%97/"/>
+    
+  </entry>
   
   <entry>
     <title>使用Istio简化微服务系列一：如何用Isito解决Spring Cloud Netflix部署微服务的挑战?【转载】</title>

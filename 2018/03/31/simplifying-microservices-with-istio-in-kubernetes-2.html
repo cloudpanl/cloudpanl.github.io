@@ -1,0 +1,114 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="panliang's blog."><meta name="keywords" content="Linux,Kubernetes,Docker,Microservices"><title>使用Istio简化微服务系列二：如何通过HTTPS与外部服务进行通信？【转载】 | 每天进步一点点……</title><link rel="stylesheet" type="text/css" href="//fonts.neworld.org/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.1"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.1"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">使用Istio简化微服务系列二：如何通过HTTPS与外部服务进行通信？【转载】</h1><a id="logo" href="/.">每天进步一点点……</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="Arama"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">使用Istio简化微服务系列二：如何通过HTTPS与外部服务进行通信？【转载】</h1><div class="post-meta"><a href="/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-2.html#comments" class="comment-count"></a><p><span class="date">Mar 31, 2018</span><span><a href="/categories/微服务/" class="category">微服务</a></span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><p>在本系列第一部分（<a href="https://cloudpanl.github.io/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-1.html" target="_blank" rel="noopener">使用Istio简化微服务系列一：如何用Isito解决Spring Cloud Netflix部署微服务</a>），我们展示了如何使用 Istio 简化微服务间的通信。</p>
+<p>在这一部分中，我们将看到 Istio 服务网格中的服务是如何通过HTTPS与外部服务进行通信的。</p>
+<p><img src="http://www.servicemesh.cn/uploads/article/20180315/a4b7e3dc0be2c3e6b7778f0b6d10c8db.jpeg" alt=""></p>
+<p>在上面的图1，PetService（直接与 PetDetailsService 和 PetMedicalHistoryService 服务进行通信）现在将也会调用外部的服务，外部服务位于 <a href="https://thedogapi.co.uk，返回" target="_blank" rel="noopener">https://thedogapi.co.uk，返回</a> dog 图片的 url 地址。</p>
+<p>Istio 服务网格与外部的服务通信展示在下面的图 2 所示。</p>
+<ul>
+<li>与往常一样，在服务网格内的服务通信通过HTTP协议代理</li>
+<li>与使用 HTTPS 协议的外部服务通信，内部服务仍然是发送 HTTP 请求，HTTP 请求会被以边缘（sidecar）方式部署的代理所拦截，并作为 TLS 协议的发起方与外部的服务在加密通道上进行通信</li>
+</ul>
+<p><img src="http://www.servicemesh.cn/uploads/article/20180315/e54e8c6fa5e0c0dc2d43598eccbc2710.jpeg" alt=""></p>
+<h1 id="Github-repo"><a href="#Github-repo" class="headerlink" title="Github repo"></a>Github repo</h1><p>(<a href="https://github.com/nmallya/istiodemo" target="_blank" rel="noopener">https://github.com/nmallya/istiodemo</a>)</p>
+<p>petservice 代码如下所示：</p>
+<p><img src="http://www.servicemesh.cn/uploads/article/20180315/ec25ef3a558a895d4624a0e640bf22db.png" alt=""></p>
+<p>备注：展示我们如何调用 DogAPI https，地址<a href="http://api.thedogapi.co.uk:443/v2/dog.php" target="_blank" rel="noopener">http://api.thedogapi.co.uk:443/v2/dog.php</a></p>
+<p>让我们看一下当运行以下命令时会发生什么？其中 108.59.82.93 为 入口（Ingress）IP 地址 （参见 第一部分）</p>
+<blockquote>
+<p>curl <a href="http://108.59.82.93/pet/123" target="_blank" rel="noopener">http://108.59.82.93/pet/123</a></p>
+</blockquote>
+<p>响应内容如下：</p>
+<pre><code>{
+  &quot;petDetails&quot;: {
+    &quot;petName&quot;: &quot;Maximus&quot;,
+    &quot;petAge&quot;: 5,
+    &quot;petOwner&quot;: &quot;Nithin Mallya&quot;,
+    &quot;petBreed&quot;: &quot;Dog&quot;
+  },
+  &quot;petMedicalHistory&quot;: {
+    &quot;vaccinationList&quot;: [
+      &quot;Bordetella, Leptospirosis, Rabies, Lyme Disease&quot;
+    ]
+  },
+  &quot;dogAPIResponse&quot;: {
+    &quot;message&quot;: &quot;request to https://api.thedogapi.co.uk/v2/dog.php failed, reason: read ECONNRESET&quot;,
+    &quot;type&quot;: &quot;system&quot;,
+    &quot;errno&quot;: &quot;ECONNRESET&quot;,
+    &quot;code&quot;: &quot;ECONNRESET&quot;
+  }
+}
+</code></pre><p>你会注意到当 petservice 访问位于 <a href="https://api.thedogapi.co.uk" target="_blank" rel="noopener">https://api.thedogapi.co.uk</a> 的外部服务时，上述的响应内容中 dogAPIResponse（不是最原始的名字）部分有一个错误信息。</p>
+<p>这是因为所有外部的流量（egress）在默认情况下被阻止。在前面的文章中解释过边车（sidecar）代理只允许集群内的通信。</p>
+<p>备注：正如我在第一部分提及的那样，当我们想要管控服务与外部服务通信的方式和阻止任何未经授权的访问的时候，这个限制非常有用。</p>
+<blockquote>
+<p>医疗保健/金融系统可以特别利用此功能来保护 PHI / PII 数据不会被无意地甚至恶意地从内部服务中共享。</p>
+</blockquote>
+<p>为了启用出口（egress）流量，你需要创建如下所示的出口规则（egress rule）：</p>
+<pre><code>cat &lt;&lt;EOF | istioctl create -f -
+apiVersion: config.istio.io/v1alpha2
+kind: EgressRule
+metadata:
+  name: dogapi-egress-rule
+spec:
+  destination:
+    service: api.thedogapi.co.uk
+  ports:
+    - port: 443
+      protocol: https
+EOF
+</code></pre><p>为了检查该出口规则（egress rule）是否已被创建，你可以运行下面的命令，你应该看到出口规则（egress rule）<code>dogapi-egress-rule</code> 已经被创建。</p>
+<pre><code>kubectl get egressrule
+
+NAME                 AGE
+dogapi-egress-rule   5m
+</code></pre><p>我们再次运行上面的 curl 命令：</p>
+<pre><code>$ curl http://108.59.82.93/pet/123
+
+{
+  &quot;petDetails&quot;: {
+    &quot;petName&quot;: &quot;Maximus&quot;,
+    &quot;petAge&quot;: 5,
+    &quot;petOwner&quot;: &quot;Nithin Mallya&quot;,
+    &quot;petBreed&quot;: &quot;Dog&quot;
+  },
+  &quot;petMedicalHistory&quot;: {
+    &quot;vaccinationList&quot;: [
+      &quot;Bordetella, Leptospirosis, Rabies, Lyme Disease&quot;
+    ]
+  },
+  &quot;dogAPIResponse&quot;: {
+    &quot;count&quot;: 1,
+    &quot;api_version&quot;: &quot;v2&quot;,
+    &quot;error&quot;: null,
+    &quot;data&quot;: [
+      {
+        &quot;id&quot;: &quot;rCaz-LNuzCC&quot;,
+&quot;url&quot;: &quot;https://i.thedogapi.co.uk/rCaz-LNuzCC.jpg&quot;,
+        &quot;time&quot;: &quot;2017-08-30T21:43:03.0&quot;,
+        &quot;format&quot;: &quot;jpg&quot;,
+        &quot;verified&quot;: &quot;1&quot;,
+        &quot;checked&quot;: &quot;1&quot;
+      }
+    ],
+    &quot;response_code&quot;: 200
+  }
+}
+</code></pre><h1 id="结论："><a href="#结论：" class="headerlink" title="结论："></a>结论：</h1><p>我们看到如何通过创建明确规则，来启用从服务网格（service mesh ）到外部服务的通信。</p>
+<p>在后续的文章中，我们将会看到如何实施其他重要的任务比如流量路由（traffic routing）和流量变化（ramping），使用断路器（circuit breaker）等。</p>
+<p>参考链接：</p>
+<ol>
+<li>Istio 官方地址 <a href="https://istio.io/" target="_blank" rel="noopener">https://istio.io/</a></li>
+<li>DevOxx 的RayTsang的Istio演讲材料: <a href="https://www.youtube.com/watch?v=AGztKw580yQ&amp;t=231s" target="_blank" rel="noopener">https://www.youtube.com/watch?v=AGztKw580yQ&amp;t=231s</a></li>
+<li>案例的Github: <a href="https://github.com/nmallya/istiodemo" target="_blank" rel="noopener">https://github.com/nmallya/istiodemo</a></li>
+<li>Kubernetes: <a href="https://kubernetes.io/" target="_blank" rel="noopener">https://kubernetes.io/</a></li>
+<li>DogAPI 网址: <a href="https://thedogapi.co.uk/" target="_blank" rel="noopener">https://thedogapi.co.uk/</a></li>
+</ol>
+<p>原文链接：<a href="https://medium.com/google-cloud/simplifying-microservices-with-istio-in-google-kubernetes-engine-part-ii-7461b1833089" target="_blank" rel="noopener">https://medium.com/google-cloud/simplifying-microservices-with-istio-in-google-kubernetes-engine-part-ii-7461b1833089</a></p>
+</div><div class="tags"><a href="/tags/Istio简化微服务系列/">Istio简化微服务系列</a></div><div class="post-share"><div class="bdsharebuttonbox"><span style="float:left;line-height: 28px;height: 28px;font-size:16px;font-weight:blod">分享到：</span><a href="#" data-cmd="more" class="bds_more"></a><a href="#" data-cmd="mshare" title="分享到一键分享" class="bds_mshare"></a><a href="#" data-cmd="fbook" title="分享到Facebook" class="bds_fbook"></a><a href="#" data-cmd="twi" title="分享到Twitter" class="bds_twi"></a><a href="#" data-cmd="linkedin" title="分享到linkedin" class="bds_linkedin"></a><a href="#" data-cmd="youdao" title="分享到有道云笔记" class="bds_youdao"></a><a href="#" data-cmd="evernotecn" title="分享到印象笔记" class="bds_evernotecn"></a><a href="#" data-cmd="weixin" title="分享到微信" class="bds_weixin"></a><a href="#" data-cmd="qzone" title="分享到QQ空间" class="bds_qzone"></a><a href="#" data-cmd="tsina" title="分享到新浪微博" class="bds_tsina"></a></div></div><div class="post-nav"><a href="/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-3.html" class="pre">使用Istio简化微服务系列三：如何才能做“金丝雀部署”，并通过Istio增加流量？【转载】</a><a href="/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-1.html" class="next">使用Istio简化微服务系列一：如何用Isito解决Spring Cloud Netflix部署微服务的挑战?【转载】</a></div><div id="comments"></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Github-repo"><span class="toc-text">Github repo</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#结论："><span class="toc-text">结论：</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-3.html">使用Istio简化微服务系列三：如何才能做“金丝雀部署”，并通过Istio增加流量？【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-2.html">使用Istio简化微服务系列二：如何通过HTTPS与外部服务进行通信？【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-1.html">使用Istio简化微服务系列一：如何用Isito解决Spring Cloud Netflix部署微服务的挑战?【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/30/Microservices-split.html">微服务拆分那点事【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/30/Container-7-regulations.html">应用容器化和与Kubernetes适配的7条军规及最佳实践【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/28/Service-deployment.html">微服务入门系列(五)：服务部署【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/28/Database-Service-Segmentation.html">微服务入门系列(四)：数据库的服务化切分【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/28/Distributed-transaction-solutions.html">微服务入门系列(三)：微服务架构下的分布式事务解决方案【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/26/Distributed-transaction-basics.html">微服务入门系列(二)：微服务架构下的分布式事务基础入门【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/25/Into-Microservices.html">微服务入门系列(一)：走进微服务的世界【转载】</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-gui"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Jenkins/">Jenkins</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kubernetes/">Kubernetes</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/微服务/">微服务</a><span class="category-list-count">11</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/亲和性/" style="font-size: 15px;">亲和性</a> <a href="/tags/微服务入门系列/" style="font-size: 15px;">微服务入门系列</a> <a href="/tags/Kubernetes/" style="font-size: 15px;">Kubernetes</a> <a href="/tags/Pipeline/" style="font-size: 15px;">Pipeline</a> <a href="/tags/微服务拆分/" style="font-size: 15px;">微服务拆分</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Istio简化微服务系列/" style="font-size: 15px;">Istio简化微服务系列</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Dubbo-Service-Mesh-微服务-ZooKeeper/" style="font-size: 15px;">Dubbo,Service Mesh,微服务,ZooKeeper</a> <a href="/tags/Spring-Cloud/" style="font-size: 15px;">Spring Cloud</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a></li></ul></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">Baidu Site Haritası</a> |  <a href="/atom.xml">订阅</a> |  <a href="/about/">关于</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次</p><p><span> Copyright &copy;<a href="/." rel="nofollow">Cloudpanl.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?8c06a0cc670571138e4a33bce0d3167a";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+  })();
+</script><script type="text/javascript" src="/js/search.json.js?v=2.0.1"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.1" async></script><script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":["mshare","weixin","tsina","qzone","linkedin","fbook","twi","print","renren","sqq","evernotecn","bdysc","tqq","tqf","bdxc","kaixin001","tieba","douban","bdhome","thx","ibaidu","meilishuo","mogujie","diandian","huaban","duitang","hx","fx","youdao","sdo","qingbiji","people","xinhua","mail","isohu","yaolan","wealink","ty","iguba","h163","copy"],"bdPic":"","bdStyle":"1","bdSize":"16"},"share":{},"image":{"viewList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"],"viewText":"分享到：","viewSize":"16"},"selectShare":{"bdContainerClass":null,"bdSelectMiniList":["tsina","qzone","weixin","fbook","twi","linkedin","youdao","evernotecn","mshare"]}};with(document)0[(getElementsByTagName('head')[0]||head).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script></body></html>
