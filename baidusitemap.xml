@@ -4,6 +4,26 @@
 
     
   <url>
+    <loc>http://yoursite.com/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-1.html</loc>
+    <lastmod>2018-03-31T03:08:32.380Z</lastmod>
+    <data>
+        <display>
+        <title>使用Istio简化微服务系列一：如何用Isito解决Spring Cloud Netflix部署微服务的挑战?【转载】</title>
+        <pubTime>2018-03-31T02:57:27.000Z</pubTime>
+        
+        <tag>Istio简化微服务系列</tag>
+         
+         
+           
+             
+              <breadCrumb title="微服务" url="http://yoursite.com/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://yoursite.com/2018/03/30/Microservices-split.html</loc>
     <lastmod>2018-03-30T05:26:23.262Z</lastmod>
     <data>
