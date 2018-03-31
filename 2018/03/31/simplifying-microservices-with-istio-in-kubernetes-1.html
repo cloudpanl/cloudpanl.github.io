@@ -54,13 +54,13 @@
 <li>宠物详细信息服务：返回宠物信息，如姓名，年龄，品种，拥有者等，它将在端口9081上运行。</li>
 <li>宠物医疗历史信息服务：返回宠物的病史（疫苗接种）。 它将在9082端口运行。</li>
 </ol>
-<h2 id="步骤："><a href="#步骤：" class="headerlink" title="步骤："></a>步骤：</h2><p>在 GKE中创建一个 Kubernetes 集群（我叫 nithinistiocluster）。 确保缺省服务帐户具有以下权限：roles / container.admin（Kubernetes Engine Admin）。</p>
+<h2 id="步骤："><a href="#步骤：" class="headerlink" title="步骤："></a>步骤：</h2><p>在 GKE中创建一个 Kubernetes 集群（我叫 nithinistiocluster）。 确保缺省服务帐户具有以下权限：<code>roles/container.admin</code>（Kubernetes Engine Admin）。</p>
 <p>按照 <a href="https://istio.io/docs/setup/kubernetes/quick-start.html" target="_blank" rel="noopener">https://istio.io/docs/setup/kubernetes/quick-start.html</a>  中的说明安装 istio。</p>
 <ol>
 <li>现在，我们准备将我们的应用程序（上述3个服务）部署到 GKE，并将边车代理注入到部署中。</li>
 <li>在 github 仓库中，您将看到4个目录（安装各种组件时创建的istio目录和我的微服务的3个目录）。</li>
-<li>对于每个微服务，我在 petinfo.yaml 文件的 kube 目录中创建了相应的 Kubernete s部署和服务。 服务名为宠物服务，宠物详细信息服务和宠物医疗历史信息服务。 由于PetServic e可以公开访问，因此它有一个指向 petservice 的 Kubernetes Ingress。</li>
-<li>你可以转到每个服务目录，在 deploy.sh 文件中更新项目和群集名称并运行它。 它构建服务，创建 Docker 镜像，将其上传到Google Container Registry，然后运行 istioct l 以注入 Envoy 代理。 例如，对于 PetService，它看起来像：</li>
+<li>对于每个微服务，我在 petinfo.yaml 文件的 kube 目录中创建了相应的 Kubernetes部署和服务。 服务名为宠物服务，宠物详细信息服务和宠物医疗历史信息服务。 由于PetService可以公开访问，因此它有一个指向 petservice 的 Kubernetes Ingress。</li>
+<li>你可以转到每个服务目录，在 deploy.sh 文件中更新项目和群集名称并运行它。 它构建服务，创建 Docker 镜像，将其上传到Google Container Registry，然后运行 istioctl 以注入 Envoy 代理。 例如，对于 PetService，它看起来像：</li>
 </ol>
 <blockquote>
 <pre><code>#!/usr/bin/env bash
