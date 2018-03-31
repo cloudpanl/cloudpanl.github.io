@@ -60,11 +60,138 @@
 <li>现在，我们准备将我们的应用程序（上述3个服务）部署到 GKE，并将边车代理注入到部署中。</li>
 <li>在 github 仓库中，您将看到4个目录（安装各种组件时创建的istio目录和我的微服务的3个目录）。</li>
 <li>对于每个微服务，我在 petinfo.yaml 文件的 kube 目录中创建了相应的 Kubernete s部署和服务。 服务名为宠物服务，宠物详细信息服务和宠物医疗历史信息服务。 由于PetServic e可以公开访问，因此它有一个指向 petservice 的 Kubernetes Ingress。</li>
-<li>你可以转到每个服务目录，在 deploy.sh 文件中更新项目和群集名称并运行它。 它构建服务，创建 Docker 镜像，将其上传到Google Container Registry，然后运行 istioct l 以注入 Envoy 代理。 例如，对于 PetService，它看起来像：<blockquote>
-</blockquote>
- #!/usr/bin/env bash<br> export PROJECT=nithinistioproject<br> export CONTAINER_VERSION=feb4v2<br> export IMAGE=gcr.io/$PROJECT/petservice:$CONTAINER_VERSION<br> export BUILD_HOME=.<br> gcloud config set project $PROJECT<br> gcloud container clusters get-credentials nithinistiocluster –zone us-central1-a –project $PROJECT<br> echo $IMAGE<br> docker build -t petservice -f “${PWD}/Dockerfile” $BUILD_HOME<br> echo ‘Successfully built ‘ $IMAGE<br> docker tag petservice $IMAGE<br> echo ‘Successfully tagged ‘ $IMAGE<br> #push to google container registry<br> gcloud docker – push $IMAGE<br> echo ‘Successfully pushed to Google Container Registry ‘ $IMAGE<h1 id="inject-envoy-proxy"><a href="#inject-envoy-proxy" class="headerlink" title="inject envoy proxy"></a>inject envoy proxy</h1> <strong>kubectl apply -f &lt;(istioctl kube-inject -f “${PWD}/kube/petinfo.yaml”)</strong></li>
+<li>你可以转到每个服务目录，在 deploy.sh 文件中更新项目和群集名称并运行它。 它构建服务，创建 Docker 镜像，将其上传到Google Container Registry，然后运行 istioct l 以注入 Envoy 代理。 例如，对于 PetService，它看起来像：</li>
 </ol>
-</div><div class="tags"><a href="/tags/Istio简化微服务系列/">Istio简化微服务系列</a></div><div class="post-share"><div class="bdsharebuttonbox"><span style="float:left;line-height: 28px;height: 28px;font-size:16px;font-weight:blod">分享到：</span><a href="#" data-cmd="more" class="bds_more"></a><a href="#" data-cmd="mshare" title="分享到一键分享" class="bds_mshare"></a><a href="#" data-cmd="fbook" title="分享到Facebook" class="bds_fbook"></a><a href="#" data-cmd="twi" title="分享到Twitter" class="bds_twi"></a><a href="#" data-cmd="linkedin" title="分享到linkedin" class="bds_linkedin"></a><a href="#" data-cmd="youdao" title="分享到有道云笔记" class="bds_youdao"></a><a href="#" data-cmd="evernotecn" title="分享到印象笔记" class="bds_evernotecn"></a><a href="#" data-cmd="weixin" title="分享到微信" class="bds_weixin"></a><a href="#" data-cmd="qzone" title="分享到QQ空间" class="bds_qzone"></a><a href="#" data-cmd="tsina" title="分享到新浪微博" class="bds_tsina"></a></div></div><div class="post-nav"><a href="/2018/03/30/Microservices-split.html" class="next">微服务拆分那点事【转载】</a></div><div id="comments"></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#概述"><span class="toc-text">概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#背景"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#进入微服务"><span class="toc-text">进入微服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Cloud-Netflix"><span class="toc-text">Spring Cloud Netflix:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#挑战"><span class="toc-text">挑战</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决方案"><span class="toc-text">解决方案</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Istio介绍："><span class="toc-text">Istio介绍：</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#用Istio进行服务—服务通信："><span class="toc-text">用Istio进行服务—服务通信：</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#步骤："><span class="toc-text">步骤：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#inject-envoy-proxy"><span class="toc-text">inject envoy proxy</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-1.html">使用Istio简化微服务系列一：如何用Isito解决Spring Cloud Netflix部署微服务的挑战?【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/30/Microservices-split.html">微服务拆分那点事【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/30/Container-7-regulations.html">应用容器化和与Kubernetes适配的7条军规及最佳实践【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/28/Service-deployment.html">微服务入门系列(五)：服务部署【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/28/Database-Service-Segmentation.html">微服务入门系列(四)：数据库的服务化切分【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/28/Distributed-transaction-solutions.html">微服务入门系列(三)：微服务架构下的分布式事务解决方案【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/26/Distributed-transaction-basics.html">微服务入门系列(二)：微服务架构下的分布式事务基础入门【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/25/Into-Microservices.html">微服务入门系列(一)：走进微服务的世界【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/24/Affinity-in-Kubernetes.html">Kubernetes中的亲和性【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/23/Pipeline-syntax.html">Pipeline语法</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-gui"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Jenkins/">Jenkins</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kubernetes/">Kubernetes</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/微服务/">微服务</a><span class="category-list-count">9</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/Kubernetes/" style="font-size: 15px;">Kubernetes</a> <a href="/tags/亲和性/" style="font-size: 15px;">亲和性</a> <a href="/tags/微服务入门系列/" style="font-size: 15px;">微服务入门系列</a> <a href="/tags/Pipeline/" style="font-size: 15px;">Pipeline</a> <a href="/tags/微服务拆分/" style="font-size: 15px;">微服务拆分</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Istio简化微服务系列/" style="font-size: 15px;">Istio简化微服务系列</a> <a href="/tags/Dubbo-Service-Mesh-微服务-ZooKeeper/" style="font-size: 15px;">Dubbo,Service Mesh,微服务,ZooKeeper</a> <a href="/tags/Spring-Cloud/" style="font-size: 15px;">Spring Cloud</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a></li></ul></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">Baidu Site Haritası</a> |  <a href="/atom.xml">订阅</a> |  <a href="/about/">关于</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次</p><p><span> Copyright &copy;<a href="/." rel="nofollow">Cloudpanl.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script>var _hmt = _hmt || [];
+<blockquote>
+<pre><code>#!/usr/bin/env bash
+export PROJECT=nithinistioproject 
+export CONTAINER_VERSION=feb4v2
+export IMAGE=gcr.io/$PROJECT/petservice:$CONTAINER_VERSION
+export BUILD_HOME=.
+gcloud config set project $PROJECT
+gcloud container clusters get-credentials nithinistiocluster --zone us-central1-a --project $PROJECT
+echo $IMAGE
+docker build -t petservice -f &quot;${PWD}/Dockerfile&quot; $BUILD_HOME
+echo &apos;Successfully built &apos; $IMAGE
+docker tag petservice $IMAGE
+echo &apos;Successfully tagged &apos; $IMAGE
+#push to google container registry
+gcloud docker -- push $IMAGE
+echo &apos;Successfully pushed to Google Container Registry &apos; $IMAGE
+# inject envoy proxy
+kubectl apply -f &lt;(istioctl kube-inject -f &quot;${PWD}/kube/petinfo.yaml&quot;)
+</code></pre></blockquote>
+<p>在上面的代码中，最后一行显示了我们如何使用 Istio 命令行工具（istioctl）来将代理注入到我们的各种 Kubernetes 部署中。</p>
+<p>Petservice 目录下的 petinfo.yaml 文件包含服务、部署和 Ingress的配置。 看起来像：</p>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: petservice
+  labels:
+    app: petservice
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: petservice
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: petservice-v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: petservice
+        version: v1
+    spec:
+      containers:
+      - name: petservice
+        image: gcr.io/nithinistioproject/petservice:feb4v2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+---
+###########################################################################
+# Ingress resource (gateway)
+##########################################################################
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gateway
+  annotations:
+    kubernetes.io/ingress.class: &quot;istio&quot;
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /pet/.*
+        backend:
+          serviceName: petservice
+          servicePort: 9080
+---
+</code></pre><p>一旦运行了 deploy.sh，就可以通过执行以下命令来检查确认部署、服务和 Ingress 是否已经创建：</p>
+<pre><code>mallyn01$ kubectl get deployment
+NAME                          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+petdetailsservice-v1          1         1         1            1           1h
+petmedicalhistoryservice-v1   1         1         1            1           58m
+petservice-v1                 1         1         1            1           54m
+mallyn01$ kubectl get service
+NAME                       TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+kubernetes                 ClusterIP   10.51.240.1    &lt;none&gt;        443/TCP    2d
+petdetailsservice          ClusterIP   10.51.255.10   &lt;none&gt;        9081/TCP   1h
+petmedicalhistoryservice   ClusterIP   10.51.244.19   &lt;none&gt;        9082/TCP   59m
+petservice                 ClusterIP   10.51.242.18   &lt;none&gt;        9080/TCP   1h
+
+petservice mallyn01$ kubectl get ing
+NAME      HOSTS     ADDRESS        PORTS     AGE
+gateway   *         108.59.82.93   80        1h
+mallyn01$ kubectl get pods
+NAME                                           READY     STATUS    RESTARTS   AGE
+petdetailsservice-v1-5bb8c65577-jmn6r          2/2       Running   0          12h
+petmedicalhistoryservice-v1-5757f98898-tq5j8   2/2       Running   0          12h
+petservice-v1-587696b469-qttqk                 2/2       Running   0          12h
+</code></pre><p>当查看控制台中 pod 的信息，即使你只为每个容器部署了一项服务，但仍会注意到有2/2个容器正在运行。 另一个容器是 istioctl 命令注入的边缘代理。</p>
+<p>5、 一旦上述所有内容都运行完毕，您可以使用 Ingress 的 IP 地址去调用示例端点来获取 Pet 的详细信息。</p>
+<pre><code>mallyn01$ curl http://108.59.82.93/pet/123
+{
+  &quot;petDetails&quot;: {
+    &quot;petName&quot;: &quot;Maximus&quot;,
+    &quot;petAge&quot;: 5,
+    &quot;petOwner&quot;: &quot;Nithin Mallya&quot;,
+    &quot;petBreed&quot;: &quot;Dog&quot;
+  },
+  &quot;petMedicalHistory&quot;: {
+    &quot;vaccinationList&quot;: [
+      &quot;Bordetella, Leptospirosis, Rabies, Lyme Disease&quot;
+    ]
+  }
+}
+</code></pre><p>注意： 由于 PetService 调用 PetDetailsService 和 PetMedicalHistoryService，实际的调用将如下所示：</p>
+<pre><code>fetch(&apos;http://petdetailsservice:9081/pet/123/details&apos;)
+          .then(res =&gt; res.text())
+          .then(body =&gt; console.log(body));
+        ;
+fetch(&apos;http://petmedicalhistoryservice:9082/pet/123/medicalhistory&apos;)
+          .then(res =&gt; res.text())
+          .then(body =&gt; console.log(body));
+        ;
+</code></pre><h1 id="结论："><a href="#结论：" class="headerlink" title="结论："></a>结论：</h1><p>我们覆盖了大量内容 （但这只是第一部分！！）<br>在随后的部分中，将详细介绍如何使用其他 Istio 特性，例如将流量逐步迁移到一个新升级的版本上，使用性能监控仪表板等等。</p>
+<p>特别感谢 Ray Tsang 的关于 Istio 的演讲材料 。</p>
+<p>参考链接：</p>
+<ol>
+<li>The Istio home page <a href="https://istio.io/" target="_blank" rel="noopener">https://istio.io/</a></li>
+<li>DevOxx 的Ray Tsang的 Istio 演讲材料: <a href="https://www.youtube.com/watch?v=AGztKw580yQ&amp;t=231s" target="_blank" rel="noopener">https://www.youtube.com/watch?v=AGztKw580yQ&amp;t=231s</a></li>
+<li>案例的Github link: <a href="https://github.com/nmallya/istiodemo" target="_blank" rel="noopener">https://github.com/nmallya/istiodemo</a></li>
+<li>Kubernetes: <a href="https://kubernetes.io/" target="_blank" rel="noopener">https://kubernetes.io/</a></li>
+<li>微服务:  <a href="https://martinfowler.com/articles/microservices.html" target="_blank" rel="noopener">https://martinfowler.com/articles/microservices.html</a></li>
+<li>Spring Cloud Netflix: <a href="https://github.com/spring-cloud/spring-cloud-netflix" target="_blank" rel="noopener">https://github.com/spring-cloud/spring-cloud-netflix</a></li>
+</ol>
+<p>原文链接：<a href="https://medium.com/google-cloud/simplifying-microservices-with-istio-in-google-kubernetes-engine-part-i-849555f922b8" target="_blank" rel="noopener">https://medium.com/google-cloud/simplifying-microservices-with-istio-in-google-kubernetes-engine-part-i-849555f922b8</a></p>
+</div><div class="tags"><a href="/tags/Istio简化微服务系列/">Istio简化微服务系列</a></div><div class="post-share"><div class="bdsharebuttonbox"><span style="float:left;line-height: 28px;height: 28px;font-size:16px;font-weight:blod">分享到：</span><a href="#" data-cmd="more" class="bds_more"></a><a href="#" data-cmd="mshare" title="分享到一键分享" class="bds_mshare"></a><a href="#" data-cmd="fbook" title="分享到Facebook" class="bds_fbook"></a><a href="#" data-cmd="twi" title="分享到Twitter" class="bds_twi"></a><a href="#" data-cmd="linkedin" title="分享到linkedin" class="bds_linkedin"></a><a href="#" data-cmd="youdao" title="分享到有道云笔记" class="bds_youdao"></a><a href="#" data-cmd="evernotecn" title="分享到印象笔记" class="bds_evernotecn"></a><a href="#" data-cmd="weixin" title="分享到微信" class="bds_weixin"></a><a href="#" data-cmd="qzone" title="分享到QQ空间" class="bds_qzone"></a><a href="#" data-cmd="tsina" title="分享到新浪微博" class="bds_tsina"></a></div></div><div class="post-nav"><a href="/2018/03/30/Microservices-split.html" class="next">微服务拆分那点事【转载】</a></div><div id="comments"></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#概述"><span class="toc-text">概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#背景"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#进入微服务"><span class="toc-text">进入微服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Cloud-Netflix"><span class="toc-text">Spring Cloud Netflix:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#挑战"><span class="toc-text">挑战</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决方案"><span class="toc-text">解决方案</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Istio介绍："><span class="toc-text">Istio介绍：</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#用Istio进行服务—服务通信："><span class="toc-text">用Istio进行服务—服务通信：</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#步骤："><span class="toc-text">步骤：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#结论："><span class="toc-text">结论：</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-1.html">使用Istio简化微服务系列一：如何用Isito解决Spring Cloud Netflix部署微服务的挑战?【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/30/Microservices-split.html">微服务拆分那点事【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/30/Container-7-regulations.html">应用容器化和与Kubernetes适配的7条军规及最佳实践【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/28/Service-deployment.html">微服务入门系列(五)：服务部署【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/28/Database-Service-Segmentation.html">微服务入门系列(四)：数据库的服务化切分【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/28/Distributed-transaction-solutions.html">微服务入门系列(三)：微服务架构下的分布式事务解决方案【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/26/Distributed-transaction-basics.html">微服务入门系列(二)：微服务架构下的分布式事务基础入门【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/25/Into-Microservices.html">微服务入门系列(一)：走进微服务的世界【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/24/Affinity-in-Kubernetes.html">Kubernetes中的亲和性【转载】</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/03/23/Pipeline-syntax.html">Pipeline语法</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-gui"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Jenkins/">Jenkins</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kubernetes/">Kubernetes</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/微服务/">微服务</a><span class="category-list-count">9</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/Kubernetes/" style="font-size: 15px;">Kubernetes</a> <a href="/tags/亲和性/" style="font-size: 15px;">亲和性</a> <a href="/tags/微服务入门系列/" style="font-size: 15px;">微服务入门系列</a> <a href="/tags/Pipeline/" style="font-size: 15px;">Pipeline</a> <a href="/tags/微服务拆分/" style="font-size: 15px;">微服务拆分</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Istio简化微服务系列/" style="font-size: 15px;">Istio简化微服务系列</a> <a href="/tags/Dubbo-Service-Mesh-微服务-ZooKeeper/" style="font-size: 15px;">Dubbo,Service Mesh,微服务,ZooKeeper</a> <a href="/tags/Spring-Cloud/" style="font-size: 15px;">Spring Cloud</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a></li></ul></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">Baidu Site Haritası</a> |  <a href="/atom.xml">订阅</a> |  <a href="/about/">关于</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次</p><p><span> Copyright &copy;<a href="/." rel="nofollow">Cloudpanl.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script>var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "//hm.baidu.com/hm.js?8c06a0cc670571138e4a33bce0d3167a";
