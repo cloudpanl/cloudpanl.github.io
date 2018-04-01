@@ -4,6 +4,26 @@
 
     
   <url>
+    <loc>http://yoursite.com/2018/04/01/performance-tuning-overview.html</loc>
+    <lastmod>2018-04-01T15:11:44.704Z</lastmod>
+    <data>
+        <display>
+        <title>性能调优概述</title>
+        <pubTime>2018-04-01T14:40:48.000Z</pubTime>
+        
+        <tag>性能调优</tag>
+         
+         
+           
+             
+              <breadCrumb title="Linux" url="http://yoursite.com/categories/Linux/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://yoursite.com/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-1.html</loc>
     <lastmod>2018-03-31T14:28:44.879Z</lastmod>
     <data>

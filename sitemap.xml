@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2018/04/01/performance-tuning-overview.html</loc>
+    
+    <lastmod>2018-04-01T15:11:44.704Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/03/31/simplifying-microservices-with-istio-in-kubernetes-1.html</loc>
     
     <lastmod>2018-03-31T14:28:44.879Z</lastmod>
