@@ -1,19 +1,15 @@
 <!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="panliang's blog."><meta name="keywords" content="Linux,Kubernetes,Docker,Microservices"><title>Kubernetes 1.9 与 CentOS 7 内核兼容问题【转载】 | 每天进步一点点……</title><link rel="stylesheet" type="text/css" href="//fonts.neworld.org/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.1"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.1"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Kubernetes 1.9 与 CentOS 7 内核兼容问题【转载】</h1><a id="logo" href="/.">每天进步一点点……</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="Arama"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">Kubernetes 1.9 与 CentOS 7 内核兼容问题【转载】</h1><div class="post-meta"><a href="/2018/04/02/kubernetes-19-conflict-with-centos7.html#comments" class="comment-count"></a><p><span class="date">Apr 02, 2018</span><span><a href="/categories/Kubernetes/" class="category">Kubernetes</a></span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><p>生产环境发现不定时 Java 应用出现 coredump 故障，测试环境不定时出现写入 /cgroup/memory 报 no space left on device 的故障，导致整个 kubernetes node 节点无法使用。设置会随着堆积的 cgroup 越来越多，docker ps 执行异常，直到把内存吃光，机器挂死。</p>
 <p>典型报错：</p>
-<blockquote>
-</blockquote>
-<p>kubelet.ns-k8s-node001.root.log.ERROR.20180214-113740.15702:1593018:E0320 04:59:09.572336 15702 remote_runtime.go:92] RunPodSandbox from runtime service failed: rpc error: code = Unknown desc = failed to start sa<br>ndbox container for pod “osp-xxx-com-ljqm19-54bf7678b8-bvz9s”: Error response from daemon: oci runtime error: container_linux.go:247: starting container process caused “process_linux.go:258: applying cgroup configuration<br>for process caused \”mkdir /sys/fs/cgroup/memory/kubepods/burstable/podf1bd9e87-1ef2-11e8-afd3-fa163ecf2dce/8710c146b3c8b52f5da62e222273703b1e3d54a6a6270a0ea7ce1b194f1b5053: <strong>no space left on device</strong>\””</p>
-<p>或者</p>
-<blockquote>
-</blockquote>
-<p>Mar 26 18:36:59 ns-k8s-node-s0054 kernel: SLUB: Unable to allocate memory on node -1 (gfp=0x8020)</p>
-<blockquote>
-</blockquote>
-<p>Mar 26 18:36:59 ns-k8s-noah-node001 kernel: cache: ip6_dst_cache(1995:6b6bc0c9f30123084a409d89a300b017d26ee5e2c3ac8a02c295c378f3dbfa5f), object size: 448, buffer size: 448, default order: 2, min order: 0</p>
-<p>该问题发生前后，进行过 kubernetes 1.6 到 1.9 的升级工作。排查了好久才定位到问题与 kubernetes 、操作系统内核有关。</p>
+<pre><code>kubelet.ns-k8s-node001.root.log.ERROR.20180214-113740.15702:1593018:E0320 04:59:09.572336 15702 remote_runtime.go:92] RunPodSandbox from runtime service failed: rpc error: code = Unknown desc = failed to start sandbox container for pod &quot;osp-xxx-com-ljqm19-54bf7678b8-bvz9s&quot;: Error response from daemon: oci runtime error: container_linux.go:247: starting container process caused &quot;process_linux.go:258: applying cgroup configuration for process caused \&quot;mkdir /sys/fs/cgroup/memory/kubepods/burstable/podf1bd9e87-1ef2-11e8-afd3-fa163ecf2dce/8710c146b3c8b52f5da62e222273703b1e3d54a6a6270a0ea7ce1b194f1b5053: no space left on device\&quot;&quot;
+</code></pre><p>或者</p>
+<pre><code>Mar 26 18:36:59 ns-k8s-node-s0054 kernel: SLUB: Unable to allocate memory on node -1 (gfp=0x8020)
+Mar 26 18:36:59 ns-k8s-noah-node001 kernel: cache: ip6_dst_cache(1995:6b6bc0c9f30123084a409d89a300b017d26ee5e2c3ac8a02c295c378f3dbfa5f), object size: 448, buffer size: 448, default order: 2, min order: 0
+</code></pre><p>该问题发生前后，进行过 kubernetes 1.6 到 1.9 的升级工作。排查了好久才定位到问题与 kubernetes 、操作系统内核有关。</p>
 <h1 id="1-对比测试结果"><a href="#1-对比测试结果" class="headerlink" title="1. 对比测试结果"></a>1. 对比测试结果</h1><p>使用同样的测试方法，结果为：</p>
 <ul>
-<li>使用初次部署 k8s 1.6 版本测试，没有出现 cgroup memory 遗漏问题；<br>从 k8s 1.6 升级到 1.9 后，测试没有出现 cgroup memory 遗漏问题；<br>重启 kubelet 1.9 node 节点重启，再次测试，出现 cgroup memory 遗漏问题。</li>
+<li>使用初次部署 k8s 1.6 版本测试，没有出现 cgroup memory 遗漏问题；</li>
+<li>从 k8s 1.6 升级到 1.9 后，测试没有出现 cgroup memory 遗漏问题；</li>
+<li>重启 kubelet 1.9 node 节点重启，再次测试，出现 cgroup memory 遗漏问题。</li>
 </ul>
 <p>对比 k8s 1.6 和 1.9 创建的 POD 基础容器和业务容器，runc、libcontainerd、docker inspect 的容器 json 参数都一致，没有差异。</p>
 <p>为什么同样是 k8s 1.9（其他 docker、kernel 版本一致）的情况下，结果不一样呢？重启的影响是？</p>
@@ -160,15 +156,11 @@ task_struct            8      8   4016    8    8 : tunables    0    0    0 : sla
 <p>2）cgroup kernel memory 激活后可以关闭吗？</p>
 <p>按 kernel 的说明，以及 kernel 代码，激活的方式，就是传递非 -1 的值（0 也是激活）来激活。而且最小单位是 4096 PageSize 的大小。</p>
 <p>在激活 cgroup kernel memory 后，是不能关闭的，只能通过设置 -1 关闭限制，但还是会继续计数。</p>
-<blockquote>
-<p>After a group is first limited, it will be kept being accounted until it is removed. The memory limitation itself, can of course be removed by writing -1 to memory.kmem.limit_in_bytes. In this case, kmem will be accounted, but not limited.</p>
-</blockquote>
-<p>另外，在 CentOS 7.3 kernel 中，激活 cgroup kernel memory 后，即使通过 -1 设置不限制使用，但还是会频繁出现 SLUB 的报警，以及 Java crash 的问题。</p>
-<blockquote>
-<p>Mar 26 18:36:59 ns-k8s-noah-s0054 kernel: SLUB: Unable to allocate memory on node -1 (gfp=0x8020)</p>
-</blockquote>
-<p>Mar 26 18:36:59 ns-k8s-noah-s0054 kernel: cache: ip6_dst_cache(1995:6b6bc0c9f30123084a409d89a300b017d26ee5e2c3ac8a02c295c378f3dbfa5f), object size: 448, buffer size: 448, default order: 2, min order: 0</p>
-<p>3）判断 cgroup kernel memory 是否激活的方式</p>
+<pre><code>After a group is first limited, it will be kept being accounted until it is removed. The memory limitation itself, can of course be removed by writing -1 to memory.kmem.limit_in_bytes. In this case, kmem will be accounted, but not limited.
+</code></pre><p>另外，在 CentOS 7.3 kernel 中，激活 cgroup kernel memory 后，即使通过 -1 设置不限制使用，但还是会频繁出现 SLUB 的报警，以及 Java crash 的问题。</p>
+<pre><code>Mar 26 18:36:59 ns-k8s-noah-s0054 kernel: SLUB: Unable to allocate memory on node -1 (gfp=0x8020)
+Mar 26 18:36:59 ns-k8s-noah-s0054 kernel: cache: ip6_dst_cache(1995:6b6bc0c9f30123084a409d89a300b017d26ee5e2c3ac8a02c295c378f3dbfa5f), object size: 448, buffer size: 448, default order: 2, min order: 0
+</code></pre><p>3）判断 cgroup kernel memory 是否激活的方式</p>
 <p>查看对应 POD container 下的 memory.kmem.slabinfo。</p>
 <p>开启：</p>
 <pre><code># cat memory.kmem.slabinfo   
