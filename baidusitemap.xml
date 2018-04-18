@@ -3,6 +3,26 @@
 
 
     
+  <url>
+    <loc>http://yoursite.com/2018/04/18/top-5-kubernetes-best-practices.html</loc>
+    <lastmod>2018-04-18T09:47:54.246Z</lastmod>
+    <data>
+        <display>
+        <title>五大 Kubernetes 最佳实践【转载】</title>
+        <pubTime>2018-04-18T07:58:15.000Z</pubTime>
+        
+        <tag>Kubernetes</tag>
+         
+         
+           
+             
+              <breadCrumb title="Kubernetes" url="http://yoursite.com/categories/Kubernetes/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
     
   <url>
     <loc>http://yoursite.com/2018/04/02/kubernetes-19-conflict-with-centos7.html</loc>
