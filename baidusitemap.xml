@@ -4,6 +4,26 @@
 
     
   <url>
+    <loc>http://yoursite.com/2018/05/07/troubleshooting-cluster.html</loc>
+    <lastmod>2018-05-07T10:27:04.307Z</lastmod>
+    <data>
+        <display>
+        <title>Kubernetes 排错指南：集群【转载】</title>
+        <pubTime>2018-05-07T10:04:53.000Z</pubTime>
+        
+        <tag>Kubernetes 排错指南</tag>
+         
+         
+           
+             
+              <breadCrumb title="Kubernetes" url="http://yoursite.com/categories/Kubernetes/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://yoursite.com/2018/05/07/troubleshooting-index.html</loc>
     <lastmod>2018-05-07T09:54:15.244Z</lastmod>
     <data>
