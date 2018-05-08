@@ -4,6 +4,46 @@
 
     
   <url>
+    <loc>http://yoursite.com/2018/05/08/troubleshooting-pod.html</loc>
+    <lastmod>2018-05-08T15:40:36.591Z</lastmod>
+    <data>
+        <display>
+        <title>Kubernetes 排错指南：POD【转载】</title>
+        <pubTime>2018-05-08T15:38:43.000Z</pubTime>
+        
+        <tag>Kubernetes 排错指南</tag>
+         
+         
+           
+             
+              <breadCrumb title="Kubernetes" url="http://yoursite.com/categories/Kubernetes/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://yoursite.com/2018/04/02/kubernetes-19-conflict-with-centos7.html</loc>
+    <lastmod>2018-05-08T05:40:11.631Z</lastmod>
+    <data>
+        <display>
+        <title>Kubernetes 1.9 与 CentOS 7 内核兼容问题【转载】</title>
+        <pubTime>2018-04-02T07:14:18.000Z</pubTime>
+        
+        <tag>Kubernetes</tag>
+         
+         
+           
+             
+              <breadCrumb title="Kubernetes" url="http://yoursite.com/categories/Kubernetes/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://yoursite.com/2018/05/07/troubleshooting-cluster.html</loc>
     <lastmod>2018-05-07T10:27:04.307Z</lastmod>
     <data>
@@ -63,26 +103,6 @@
     </url>
 
     
-    
-  <url>
-    <loc>http://yoursite.com/2018/04/02/kubernetes-19-conflict-with-centos7.html</loc>
-    <lastmod>2018-04-02T13:22:47.110Z</lastmod>
-    <data>
-        <display>
-        <title>Kubernetes 1.9 与 CentOS 7 内核兼容问题【转载】</title>
-        <pubTime>2018-04-02T07:14:18.000Z</pubTime>
-        
-        <tag>Kubernetes</tag>
-         
-         
-           
-             
-              <breadCrumb title="Kubernetes" url="http://yoursite.com/categories/Kubernetes/"/>
-          
-        </display>
-    </data>
-    </url>
-
     
   <url>
     <loc>http://yoursite.com/2018/04/01/performance-tuning-overview.html</loc>

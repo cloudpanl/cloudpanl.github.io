@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2018/05/08/troubleshooting-pod.html</loc>
+    
+    <lastmod>2018-05-08T15:40:36.591Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2018/04/02/kubernetes-19-conflict-with-centos7.html</loc>
+    
+    <lastmod>2018-05-08T05:40:11.631Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/05/07/troubleshooting-cluster.html</loc>
     
     <lastmod>2018-05-07T10:27:04.307Z</lastmod>
@@ -26,13 +40,6 @@
     <loc>http://yoursite.com/about/index.html</loc>
     
     <lastmod>2018-04-18T14:22:50.668Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2018/04/02/kubernetes-19-conflict-with-centos7.html</loc>
-    
-    <lastmod>2018-04-02T13:22:47.110Z</lastmod>
     
   </url>
   
